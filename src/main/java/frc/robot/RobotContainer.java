@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.robot.AutoFactory.CharacterizationRoutine;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.LEDConstants;
 import frc.robot.Constants.DriveConstants.BackLeftModuleConstants;
 import frc.robot.Constants.DriveConstants.BackRightModuleConstants;
 import frc.robot.Constants.DriveConstants.FrontLeftModuleConstants;
