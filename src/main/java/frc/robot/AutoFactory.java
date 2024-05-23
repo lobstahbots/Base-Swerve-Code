@@ -3,20 +3,14 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,50 +19,21 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.PivotConstants;
-import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.IndexerConstants;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.PathConstants;
-import frc.robot.commands.RotatePivotCommand;
-import frc.robot.commands.SpinIndexerCommand;
-import frc.robot.commands.SpinIntakeCommand;
-import frc.robot.commands.SpinShooterCommand;
-import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.commands.SwerveDriveStopCommand;
-import frc.robot.commands.TurnToAngleCommand;
-import frc.robot.commands.TurnToPointCommand;
 import frc.robot.subsystems.drive.DriveBase;
-import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.pivot.Pivot;
-import frc.robot.subsystems.pivot.PivotKinematics;
-import frc.robot.subsystems.shooter.NoteVisualizer;
-import frc.robot.subsystems.shooter.Shooter;
-import stl.command.PeriodicConditionalCommand;
 import stl.sysId.CharacterizableSubsystem;
-import stl.trajectory.AlliancePoseMirror;
 
 public class AutoFactory {
     private final Supplier<List<Object>> responses;
     private final DriveBase driveBase;
-    private final Intake intake;
-    private final Shooter shooter;
-    private final Indexer indexer;
-    private final Pivot pivot;
 
-    public AutoFactory(DriveBase driveBase, Shooter shooter, Intake intake, Pivot pivot, Indexer indexer,
+    public AutoFactory(DriveBase driveBase,
             Supplier<List<Object>> responsesSupplier) {
         this.responses = responsesSupplier;
         this.driveBase = driveBase;
-        this.intake = intake;
-        this.shooter = shooter;
-        this.pivot = pivot;
-        this.indexer = indexer;
 
         AutoBuilder.configureHolonomic(driveBase::getPose, // Robot pose supplier
                 driveBase::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
@@ -83,9 +48,6 @@ public class AutoFactory {
                 ), () -> {
                     return DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
                 }, driveBase);
-
-        NoteVisualizer.setRobotPoseSupplier(driveBase::getPose, pivot::getPosition);
-
     }
 
     /**
@@ -189,189 +151,6 @@ public class AutoFactory {
                                                                                                                       // before attempting to rotate.
         );
         return pathCommand;
-    }
-
-    /* Aim and end. */
-    public Command aimOnce(Supplier<Rotation2d> value) {
-        return new RotatePivotCommand(pivot, value.get().getDegrees()).until(
-                () -> Math.abs(pivot.getPosition().minus(value.get()).getDegrees()) < PivotConstants.MAX_PIVOT_ERROR);
-    }
-
-    /* Automatically aim at speaker and stop once it reaches the angle. */
-    public Command autoAimOnce() {
-        return aimOnce(() -> Rotation2d.fromDegrees(PivotKinematics
-                .getShotAngle(() -> FieldConstants.BLUE_ALLIANCE_SPEAKER_POSE3D.toPose2d(), driveBase::getPose)
-                .getAsDouble()));
-    }
-
-    /* Automatically aim at speaker and hold. */
-    public Command autoAimHold() {
-        return new RotatePivotCommand(pivot,
-                () -> PivotKinematics
-                        .getShotAngle(() -> FieldConstants.BLUE_ALLIANCE_SPEAKER_POSE3D.toPose2d(), driveBase::getPose)
-                        .getAsDouble());
-    }
-
-    /* Automatically aim and shoot note at speaker. */
-    public Command aimAndShoot() {
-        return autoAimOnce()
-                .andThen(new SpinShooterCommand(shooter, ShooterConstants.SHOOTER_SPEED, ShooterConstants.SHOOTER_SPEED)
-                        .alongWith(new WaitCommand(2)
-                                .until(() -> shooter.getLowerFlywheelVelocityRPS() > shooter.getSetpoint()
-                                        * ShooterConstants.SHOOTING_FLYWHEEL_VELOCITY_DEADBAND_FACTOR
-                                        && shooter.getUpperFlywheelVelocityRPS() > shooter.getSetpoint()
-                                                * ShooterConstants.SHOOTING_FLYWHEEL_VELOCITY_DEADBAND_FACTOR)
-                                .andThen(new SpinIndexerCommand(indexer, IndexerConstants.FAST_INDEXER_MOTOR_SPEED)))
-                        .alongWith(autoAimHold()))
-                .withTimeout(3).until(() -> !indexer.flywheelBeamBroken() && !indexer.intakeBeamBroken());
-    }
-
-    public Command getCleanup() {
-        return getPathFindToPathCommand("Cleanup", PathType.CHOREO);
-    }
-
-    /* Hardcoded two-note auto. (BSU) */
-    public Command getTwoNote() {
-        return aimOnce(() -> Rotation2d.fromDegrees(40))
-                .andThen(new SpinShooterCommand(shooter, ShooterConstants.SHOOTER_SPEED, ShooterConstants.SHOOTER_SPEED)
-                        .alongWith(new WaitCommand(2)
-                                .andThen(new SpinIndexerCommand(indexer, IndexerConstants.FAST_INDEXER_MOTOR_SPEED)))
-                        .alongWith(new RotatePivotCommand(pivot, 40)))
-                .withTimeout(5)
-                .andThen(aimOnce(() -> new Rotation2d(0))
-                        .alongWith(new InstantCommand(() -> shooter.setIdleMode(NeutralModeValue.Brake))))
-                .andThen(new SwerveDriveCommand(driveBase, 0.15, 0, 0, true).withTimeout(1.5)
-                        .raceWith(new SpinIntakeCommand(intake, IntakeConstants.INTAKE_SPEED)
-                                .alongWith(new SpinIndexerCommand(indexer, IndexerConstants.FAST_INDEXER_MOTOR_SPEED))))
-                .andThen(aimOnce(() -> Rotation2d.fromDegrees(22)).andThen(
-                        new SpinShooterCommand(shooter, ShooterConstants.SHOOTER_SPEED, ShooterConstants.SHOOTER_SPEED)
-                                .alongWith(new WaitCommand(2).andThen(
-                                        new SpinIndexerCommand(indexer, IndexerConstants.FAST_INDEXER_MOTOR_SPEED)))
-                                .alongWith(new RotatePivotCommand(pivot, 22)))
-                        .withTimeout(5));
-    }
-
-    public Command getInitialPose() {
-        int startingIndex = (int) responses.get().get(0);
-        if (startingIndex == 0) {
-            return new InstantCommand(() -> driveBase
-                    .resetPose(AlliancePoseMirror.mirrorPose2d(new Pose2d(0.61, 6.47, driveBase.getGyroAngle()))));
-        } else if (startingIndex == 1) {
-            return new InstantCommand(() -> driveBase
-                    .resetPose(AlliancePoseMirror.mirrorPose2d(new Pose2d(1.07, 5.46, driveBase.getGyroAngle()))));
-        } else {
-            return new InstantCommand(() -> driveBase
-                    .resetPose(AlliancePoseMirror.mirrorPose2d(new Pose2d(0.51, 4.47, driveBase.getGyroAngle()))));
-        }
-    }
-
-    /* Hardcoded drive-back auto. (BSU) */
-    public Command getDriveAuto() {
-        return new SwerveDriveCommand(driveBase, 0.5, 0, 0, false).withTimeout(3);
-    }
-
-    /* Hardcoded one-note auto. (BSU) */
-    public Command getScoreAuto() {
-        return aimOnce(() -> Rotation2d.fromDegrees(40))
-                .andThen(new SpinShooterCommand(shooter, ShooterConstants.SHOOTER_SPEED, ShooterConstants.SHOOTER_SPEED)
-                        .alongWith(new WaitCommand(2)
-                                .until(() -> shooter.getLowerFlywheelVelocityRPS() > shooter.getSetpoint()
-                                        * ShooterConstants.SHOOTING_FLYWHEEL_VELOCITY_DEADBAND_FACTOR
-                                        && shooter.getUpperFlywheelVelocityRPS() > shooter.getSetpoint()
-                                                * ShooterConstants.SHOOTING_FLYWHEEL_VELOCITY_DEADBAND_FACTOR)
-                                .andThen(new SpinIndexerCommand(indexer, IndexerConstants.FAST_INDEXER_MOTOR_SPEED)))
-                        .alongWith(new RotatePivotCommand(pivot, 40)))
-                .withTimeout(5).until(() -> !indexer.intakeBeamBroken() && !indexer.flywheelBeamBroken());
-    }
-
-    /* Hardcoded one note and drive back auto. (BSU) */
-    public Command getScoreAndDriveAuto() {
-        return getScoreAuto().andThen(new SwerveDriveCommand(driveBase, 0.5, 0, 0, false).withTimeout(3));
-    }
-
-    public Command intake() {
-        return new SpinIntakeCommand(intake, IntakeConstants.INTAKE_SPEED)
-        .alongWith(new PeriodicConditionalCommand(new SpinIndexerCommand(indexer, 0),
-                new SpinIndexerCommand(indexer,
-                        IndexerConstants.FAST_INDEXER_MOTOR_SPEED),
-                () -> indexer.flywheelBeamBroken() && indexer.intakeBeamBroken()));
-    }
-
-    public Command shootTurnIntake() {
-        return aimAndShoot().andThen(new TurnToAngleCommand(driveBase, new Rotation2d(0), 0, 0, true)).andThen(intake());
-    }
-
-    /* Pickup and score one note. */
-    public Command pickupAndScore(Pose2d notePoseBlue, Pose2d scoringPose) {
-        Pose2d targetPose = FieldConstants.BLUE_ALLIANCE_SPEAKER_POSE3D.toPose2d();
-        Logger.recordOutput(notePoseBlue.toString(),
-                new Pose2d(notePoseBlue.getX() - FieldConstants.PICKUP_OFFSET, notePoseBlue.getY(), new Rotation2d()));
-        Command pickupAndScoreCommand = getPathFindToPoseCommand(
-                new Pose2d(notePoseBlue.getX() - FieldConstants.PICKUP_OFFSET, notePoseBlue.getY(), new Rotation2d()))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 0)))
-                        .raceWith(new RotatePivotCommand(pivot, 0))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 1)))
-                        .andThen(new SwerveDriveStopCommand(driveBase))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 2)))
-                        .andThen(new TurnToAngleCommand(driveBase, new Rotation2d(0), 0, 0, true))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 3)))
-                        .andThen(new InstantCommand(() -> shooter.setIdleMode(NeutralModeValue.Brake)))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 4)))
-                        .andThen(new SwerveDriveCommand(driveBase, 0.2, 0, 0, true).withTimeout(0.9)
-                                .deadlineWith(new SpinIntakeCommand(intake, IntakeConstants.INTAKE_SPEED)
-                                        .alongWith(new PeriodicConditionalCommand(new SpinIndexerCommand(indexer, 0),
-                                                new SpinIndexerCommand(indexer,
-                                                        IndexerConstants.FAST_INDEXER_MOTOR_SPEED),
-                                                () -> indexer.flywheelBeamBroken() && indexer.intakeBeamBroken()))))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 5)))
-                        //  .andThen(getPathFindToPoseCommand(scoringPose)
-                                //  .onlyIf(() -> notePoseBlue.getX() > scoringPose.getX()))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 6)))
-                        .andThen(new TurnToPointCommand(driveBase, driveBase::getPose, targetPose, 0, 0, false, true))
-                        .andThen(new InstantCommand(() -> Logger.recordOutput("Auto Step", 7))).andThen(aimAndShoot());
-        return pickupAndScoreCommand;
-    }
-
-    @AutoLogOutput
-    public BooleanSupplier isWithinTarget(Pose2d target, double zone) {
-        return () -> Math.abs(driveBase.getPose().getTranslation()
-                .getDistance(AlliancePoseMirror.mirrorTranslation2d(target.getTranslation()))) < zone;
-    }
-
-    public Command getWingAndMidlineAuto() {
-        int startingWingNoteIndex = (int) responses.get().get(0);
-        int endingWingNoteIndex = (int) responses.get().get(1);
-        int startingCenterNoteIndex = (int) responses.get().get(2);
-        int endingCenterNoteIndex = (int) responses.get().get(3);
-
-        Command autoCommand = aimAndShoot();
-
-        if (startingWingNoteIndex < endingWingNoteIndex) {
-            for (int i = startingWingNoteIndex; i <= endingWingNoteIndex; i++) {
-                autoCommand = autoCommand.andThen(pickupAndScore(FieldConstants.BLUE_WING_NOTES_STARTING_POSES[i],
-                        new Pose2d(16, 16, new Rotation2d())));
-            }
-        } else {
-            for (int i = startingWingNoteIndex; i >= endingWingNoteIndex; i--) {
-                autoCommand = autoCommand.andThen(pickupAndScore(FieldConstants.BLUE_WING_NOTES_STARTING_POSES[i],
-                        new Pose2d(16, 16, new Rotation2d())));
-            }
-        }
-
-        if (startingCenterNoteIndex < endingCenterNoteIndex) {
-            for (int i = startingCenterNoteIndex; i <= endingCenterNoteIndex; i++) {
-                autoCommand = autoCommand.andThen(pickupAndScore(FieldConstants.MIDLINE_NOTES_STARTING_POSES[i],
-                        FieldConstants.SHOOTING_POSES[i / 3]));
-            }
-        } else {
-            for (int i = startingCenterNoteIndex; i >= endingCenterNoteIndex; i--) {
-                autoCommand = autoCommand.andThen(pickupAndScore(FieldConstants.MIDLINE_NOTES_STARTING_POSES[i],
-                        FieldConstants.SHOOTING_POSES[i / 3]));
-            }
-        }
-
-        return autoCommand;
-
     }
 
     public enum CharacterizationRoutine {

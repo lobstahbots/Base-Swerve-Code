@@ -12,21 +12,16 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
-
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.revrobotics.CANSparkMax.IdleMode;
-
 import edu.wpi.first.hal.can.CANStatus;
-import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SimConstants;
-import frc.robot.networkalerts.Alert;
-import frc.robot.networkalerts.Alert.AlertType;
+import stl.networkalerts.Alert;
+import stl.networkalerts.Alert.AlertType;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -77,15 +72,6 @@ public class Robot extends LoggedRobot {
         URCL.start();
         Logger.start();
 
-        // PortForwarder.add(5801, "photonvision1.local", 5800);
-        // PortForwarder.add(5802, "photonvision2.local", 5800);
-        // PortForwarder.add(1183, "10.2.46.11", 1183);
-        // PortForwarder.add(1184, "10.2.46.11", 1184);
-        // PortForwarder.add(1189, "10.2.46.12", 1189);
-        // PortForwarder.add(1190, "10.2.46.12", 1190);
-
-        // Logger.getInstance().disableDeterministicTimestamps() // See "Deterministic Timestamps" in the "Understanding Data Flow" page
-
         m_robotContainer = new RobotContainer();
     }
 
@@ -132,8 +118,6 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
-
-        m_robotContainer.setIdleMode(IdleMode.kBrake, NeutralModeValue.Brake);
     }
 
     /** This function is called periodically during autonomous. */
@@ -149,8 +133,6 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-
-        m_robotContainer.setIdleMode(IdleMode.kBrake, NeutralModeValue.Coast);
     }
 
     /** This function is called periodically during operator control. */
@@ -165,9 +147,7 @@ public class Robot extends LoggedRobot {
 
     /** This function is called periodically during test mode. */
     @Override
-    public void testPeriodic() {
-        m_robotContainer.setIdleMode(IdleMode.kCoast, NeutralModeValue.Coast);
-    }
+    public void testPeriodic() {}
 
     /** This function is called once when the robot is first started up. */
     @Override

@@ -24,7 +24,7 @@ public class MonitoredTalonFX extends TalonFX implements Monitorable {
      * </ul>
      *
      * @param deviceId ID of the device, as configured in Phoenix Tuner.
-     * @param label label The label associated with this motor, for use in {@link frc.robot.networkalerts.Alert NetworkAlerts}.
+     * @param label label The label associated with this motor, for use in {@link stl.networkalerts.Alert NetworkAlerts}.
      */
     public MonitoredTalonFX(int deviceId, String label) {
         super(deviceId);

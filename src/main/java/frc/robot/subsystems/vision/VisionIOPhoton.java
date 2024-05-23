@@ -12,8 +12,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.networkalerts.Alert;
-import frc.robot.networkalerts.Alert.AlertType;
+import stl.networkalerts.Alert;
+import stl.networkalerts.Alert.AlertType;
 
 public class VisionIOPhoton implements VisionIO {
     private final PhotonCamera frontCamera;
