@@ -34,8 +34,9 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
       setDriveVoltage(0);
       setTurnVoltage(0);
     }
-
-    inputs.turnPosition = Rotation2d.fromRadians(simAngleMotor.getAngularPositionRad() + angularOffset.getRadians());
+    
+    inputs.turnAbsolutePosition = Rotation2d.fromRadians(simAngleMotor.getAngularPositionRad() + angularOffset.getRadians());
+    inputs.turnPosition = Rotation2d.fromRadians(simAngleMotor.getAngularPositionRad());
     inputs.drivePosition = Rotation2d.fromRadians(simDriveMotor.getAngularPositionRad() + simDriveMotor.getAngularVelocityRadPerSec() * SimConstants.LOOP_TIME);
     inputs.driveVelocityRadPerSec = simDriveMotor.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
@@ -43,6 +44,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     inputs.turnVelocityRadPerSec = simAngleMotor.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
     inputs.turnCurrentAmps = new double[] { Math.abs(simAngleMotor.getCurrentDrawAmps()) };
+    inputs.angularOffset = angularOffset;
   }
 
   /**Sets voltage of driving motor.
@@ -50,7 +52,8 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
    * @param volts The voltage the motor should be set to.
    */
   public void setDriveVoltage(double volts) {
-    simDriveMotor.setInputVoltage(MathUtil.clamp(volts, -12.0, 12.0));
+    driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    simDriveMotor.setInputVoltage(driveAppliedVolts);
   }
 
   /**Sets voltage of turn motor.
@@ -58,7 +61,8 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
    * @param volts The voltage the motor should be set to.
    */
   public void setTurnVoltage(double volts) {
-    simAngleMotor.setInputVoltage(MathUtil.clamp(volts, -12.0, 12.0));
+    turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    simAngleMotor.setInputVoltage(turnAppliedVolts);
   }
 
 }

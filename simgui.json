@@ -1,0 +1,30 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto Chooser/Question #1 Chooser": "String Chooser",
+      "/SmartDashboard/Auto Chooser/Question #2 Chooser": "String Chooser",
+      "/SmartDashboard/Auto Chooser/Question #3 Chooser": "String Chooser",
+      "/SmartDashboard/Auto Chooser/Question #4 Chooser": "String Chooser",
+      "/SmartDashboard/Auto Chooser/Routine": "String Chooser",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  }
+}

@@ -105,6 +105,11 @@ public class SwerveModule {
     return new Rotation2d(inputs.turnPosition.getRadians());
   }
 
+   /** Returns the current turn angle of the module. */
+   public Rotation2d getAbsoluteAngle() {
+    return new Rotation2d(inputs.turnAbsolutePosition.getRadians());
+  }
+
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
     return inputs.drivePosition.getRotations() *  Math.PI * RobotConstants.WHEEL_DIAMETER / RobotConstants.DRIVE_GEAR_RATIO;

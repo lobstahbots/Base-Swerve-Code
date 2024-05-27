@@ -52,7 +52,7 @@ public class SwerveSetpointGenerator {
         return epsilonEquals(twist.dx, other.dx)
             && epsilonEquals(twist.dy, other.dy)
             && epsilonEquals(twist.dtheta, other.dtheta);
-      }
+    }
 
     @FunctionalInterface
     private interface Function2d {

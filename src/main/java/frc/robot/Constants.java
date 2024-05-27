@@ -95,17 +95,17 @@ public final class Constants {
   }
 
   public static class DriveConstants {
-    public static final double MAX_ACCELERATION = 3;
-    public static final double MAX_DRIVE_SPEED = 10;
-    public static final double MAX_ANGULAR_SPEED = MAX_DRIVE_SPEED / RobotConstants.RADIUS;
+    public static final double MAX_ACCELERATION = 30;
+    public static final double MAX_DRIVE_SPEED = 100;
+    public static final double MAX_ANGULAR_SPEED = 100;
     public static final double SLOWDOWN_PERCENT = 0.5;
     public static final int DRIVE_MOTOR_CURRENT_LIMIT = 40;
     public static final int ANGLE_MOTOR_CURRENT_LIMIT = 40;
     public static final Translation2d[] MODULE_LOCATIONS = new Translation2d[] {
         new Translation2d(RobotConstants.WHEELBASE / 2.0, RobotConstants.TRACK_WIDTH / 2.0),
         new Translation2d(RobotConstants.WHEELBASE / 2.0, -RobotConstants.TRACK_WIDTH / 2.0),
+        new Translation2d(-RobotConstants.WHEELBASE / 2.0, RobotConstants.TRACK_WIDTH / 2.0),
         new Translation2d(-RobotConstants.WHEELBASE / 2.0, -RobotConstants.TRACK_WIDTH / 2.0),
-        new Translation2d(-RobotConstants.WHEELBASE / 2.0, RobotConstants.TRACK_WIDTH / 2.0)
     };
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
         MODULE_LOCATIONS[0], MODULE_LOCATIONS[1], MODULE_LOCATIONS[2], MODULE_LOCATIONS[3]);

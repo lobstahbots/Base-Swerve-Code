@@ -19,6 +19,7 @@ public interface SwerveModuleIO {
     public double driveAppliedVolts = 0.0;
     public double[] driveCurrentAmps = new double[] {};
 
+    public Rotation2d turnAbsolutePosition = new Rotation2d();
     public Rotation2d turnPosition = new Rotation2d();
     public double turnVelocityRadPerSec = 0.0;
     public double turnAppliedVolts = 0.0;
@@ -26,13 +27,13 @@ public interface SwerveModuleIO {
     public Rotation2d angularOffset = new Rotation2d();
   }
 
-  public default void updateInputs(ModuleIOInputs inputs) {}
+  public abstract void updateInputs(ModuleIOInputs inputs);
 
   /** Run the drive motor at the specified voltage. */
-  public default void setDriveVoltage(double volts) {}
+  public abstract void setDriveVoltage(double volts);
 
   /** Run the turn motor at the specified voltage. */
-  public default void setTurnVoltage(double volts) {}
+  public abstract void setTurnVoltage(double volts);
 
   /** Set the angle to the angle specified in the module state. */
   public default void setAngle(SwerveModuleState optimizedDesiredState){}
