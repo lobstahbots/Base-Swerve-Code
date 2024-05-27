@@ -2,7 +2,7 @@ package frc.robot;
 
 /**
  * Automatically generated file containing build version information.
- */
+ */ 
 public final class BuildConstants {
   public static final String MAVEN_GROUP = "";
   public static final String MAVEN_NAME = "Base-Swerve-Code";
