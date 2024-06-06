@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.VisionConstants;
@@ -331,14 +330,6 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
       Logger.recordOutput("Back Right Pose", robotPose3d.plus(VisionConstants.ROBOT_TO_REAR_CAMERA));
 
       Logger.recordOutput("Odometry/Robot3d", robotPose3d);
-
-      for(int i = 0; i < FieldConstants.NOTES_SIM_POSES.length; i++) {
-        if(MathUtil.applyDeadband(getPose().minus(FieldConstants.NOTES_SIM_POSES[i].toPose2d()).getTranslation().getNorm(), 0.25) == 0) {
-          FieldConstants.NOTES_SIM_POSES[i] = FieldConstants.BLUE_ALLIANCE_SPEAKER_POSE3D;
-        }
-      }
-
-      Logger.recordOutput("Notes", FieldConstants.NOTES_SIM_POSES);
     }
   }
 }
