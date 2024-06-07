@@ -54,6 +54,7 @@ public final class Constants {
       public static final int STRAFE_X_AXIS = 0;
       public static final int STRAFE_Y_AXIS = 1;
       public static final int ROTATION_AXIS = 2;
+      public static final boolean SQUARE_INPUTS = false;
     }
     public static class OperatorIOConstants {
       public static final int OPERATOR_CONTROLLER_PORT = 1;
