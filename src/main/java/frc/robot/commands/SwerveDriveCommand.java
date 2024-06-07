@@ -25,20 +25,22 @@ public class SwerveDriveCommand extends Command {
   private final DoubleSupplier strafeYSupplier;
   private final DoubleSupplier rotationSupplier;
   private final BooleanSupplier fieldCentric;
+  private final boolean squareInputs;
 
   public SwerveDriveCommand(DriveBase driveBase, DoubleSupplier strafeXSupplier, DoubleSupplier strafeYSupplier,
-      DoubleSupplier rotationSupplier, BooleanSupplier fieldCentric) {
+      DoubleSupplier rotationSupplier, BooleanSupplier fieldCentric, boolean squareInputs) {
     this.driveBase = driveBase;
     this.strafeXSupplier = strafeXSupplier;
     this.strafeYSupplier = strafeYSupplier;
     this.rotationSupplier = rotationSupplier;
     this.fieldCentric = fieldCentric;
+    this.squareInputs = squareInputs;
     addRequirements(driveBase);
   }
 
   public SwerveDriveCommand(DriveBase driveBase, double strafeX, double strafeY, double rotation,
-      boolean fieldCentric) {
-    this(driveBase, () -> strafeX, () -> strafeY, () -> rotation, () -> fieldCentric);
+      boolean fieldCentric, boolean squareInputs) {
+    this(driveBase, () -> strafeX, () -> strafeY, () -> rotation, () -> fieldCentric, squareInputs);
   }
 
   @Override
@@ -50,8 +52,10 @@ public class SwerveDriveCommand extends Command {
       double omega = MathUtil.applyDeadband(rotationSupplier.getAsDouble(), IOConstants.JOYSTICK_DEADBAND);
 
       // Square values
-      // linearMagnitude = linearMagnitude * linearMagnitude;
-      omega = Math.copySign(omega * omega, omega);
+      if(squareInputs) {
+        linearMagnitude = linearMagnitude * linearMagnitude;
+        omega = Math.copySign(omega * omega, omega);
+      } 
 
       // Calculate new linear velocity
       Translation2d linearVelocity = new Pose2d(new Translation2d(), linearDirection)
