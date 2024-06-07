@@ -164,6 +164,7 @@ public class Alert {
                     break;
             }
         }
+        active = res;
         return res;
     }
 
