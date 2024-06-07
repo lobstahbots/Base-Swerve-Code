@@ -7,6 +7,9 @@ package frc.robot;
 import frc.robot.subsystems.vision.PhotonPoseEstimator.PoseStrategy;
 
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -49,6 +52,7 @@ public final class Constants {
 
   public static class IOConstants {
     public static final double JOYSTICK_DEADBAND = 0.1;
+
     public static class DriverIOConstants {
       public static final int DRIVER_CONTROLLER_PORT = 0;
       public static final int STRAFE_X_AXIS = 0;
@@ -56,6 +60,7 @@ public final class Constants {
       public static final int ROTATION_AXIS = 2;
       public static final boolean SQUARE_INPUTS = false;
     }
+
     public static class OperatorIOConstants {
       public static final int OPERATOR_CONTROLLER_PORT = 1;
     }
@@ -64,7 +69,9 @@ public final class Constants {
   public static class RobotConstants {
     public static final double WHEELBASE = Units.inchesToMeters(28);
     public static final double TRACK_WIDTH = Units.inchesToMeters(28);
-    public static final double RADIUS = Units.inchesToMeters(new Translation2d(20, 20).getNorm());
+    public static final double EDGE_TO_MODULE_CENTER = Units.inchesToMeters(1.75);
+    // Distance from robot center to module center
+    public static final double RADIUS = Math.sqrt(2 * Math.pow(WHEELBASE / 2 - EDGE_TO_MODULE_CENTER, 2));
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(3);
     public static final double DRIVE_GEAR_RATIO = 4.71;
     public static final double ANGLE_GEAR_RATIO = 6.1;
@@ -98,6 +105,14 @@ public final class Constants {
     public static final double TURN_KD = 0;
 
     public static final double TURN_DEADBAND = Units.degreesToRadians(5);
+
+    public static final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+        new PIDConstants(2.25, 0.0, 0), // Translation PID constants
+        new PIDConstants(0.5, 0.0, 0), // Rotation PID constants
+        0.1, // Max module speed, in m/s
+        RobotConstants.RADIUS, // Drive base radius in meters. Distance from robot center to furthest module.
+        new ReplanningConfig(true, false) // Default path replanning config. See the API for the options
+    );
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
@@ -199,7 +214,7 @@ public final class Constants {
 
     public static final double AMBIGUITY_TO_STDEV_EXP = 1;
     public static final Vector<N3> BASE_STDEV = VecBuilder.fill(0.1, 0.1, 1000.0); // x, y, angle
-    public static final double AMBIGUITY_ACCEPTANCE_THRESHOLD = 0.2; 
+    public static final double AMBIGUITY_ACCEPTANCE_THRESHOLD = 0.2;
     public static final double REPROJECTION_ERROR_REJECTION_THRESHOLD = 0.4;
   }
 

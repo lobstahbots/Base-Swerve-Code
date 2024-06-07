@@ -8,19 +8,16 @@ import org.littletonrobotics.junction.Logger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.PathConstants;
 import frc.robot.commands.SwerveDriveStopCommand;
 import frc.robot.subsystems.drive.DriveBase;
@@ -39,13 +36,7 @@ public class AutoFactory {
                 driveBase::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
                 driveBase::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 driveBase::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your
-                        new PIDConstants(2.25, 0.0, 0), // Translation PID constants
-                        new PIDConstants(0.5, 0.0, 0), // Rotation PID constants
-                        0.1, // Max module speed, in m/s
-                        Units.inchesToMeters(Math.sqrt(35 * 35 + 35 * 35)), // Drive base radius in meters. Distance from robot center to furthest module.
-                        new ReplanningConfig(true, false) // Default path replanning config. See the API for the options
-                ), () -> {
+                DriveConstants.PATH_FOLLOWER_CONFIG, () -> {
                     return DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
                 }, driveBase);
     }
@@ -67,7 +58,11 @@ public class AutoFactory {
     public Command getPathFindToPoseCommand(Pose2d targetPose) {
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0, // Goal end velocity in meters/sec
+        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0, // Goal
+                                                                                                                   // end
+                                                                                                                   // velocity
+                                                                                                                   // in
+                                                                                                                   // meters/sec
                 0.0 // Rotation delay distance in meters. This is how far the robot should travel
                     // before attempting to rotate.
         ).andThen(new SwerveDriveStopCommand(driveBase));
@@ -84,7 +79,11 @@ public class AutoFactory {
     public Command getPathFindToPoseCommand(Supplier<Pose2d> targetPose) {
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose.get(), PathConstants.CONSTRAINTS, 0.0, // Goal end velocity in meters/sec
+        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose.get(), PathConstants.CONSTRAINTS, 0.0, // Goal
+                                                                                                                         // end
+                                                                                                                         // velocity
+                                                                                                                         // in
+                                                                                                                         // meters/sec
                 0.0 // Rotation delay distance in meters. This is how far the robot should travel
                     // before attempting to rotate.
         ).andThen(new SwerveDriveStopCommand(driveBase));
@@ -118,8 +117,21 @@ public class AutoFactory {
         }
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation delay distance in meters. This is how far the robot should travel
-                                                                                                             // before attempting to rotate.
+        Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation
+                                                                                                             // delay
+                                                                                                             // distance
+                                                                                                             // in
+                                                                                                             // meters.
+                                                                                                             // This is
+                                                                                                             // how far
+                                                                                                             // the
+                                                                                                             // robot
+                                                                                                             // should
+                                                                                                             // travel
+                                                                                                             // before
+                                                                                                             // attempting
+                                                                                                             // to
+                                                                                                             // rotate.
         );
 
         return pathfindingCommand;
@@ -143,12 +155,27 @@ public class AutoFactory {
         // Create the path using the bezier points created above
         PathPlannerPath path = new PathPlannerPath(bezierPoints, PathConstants.CONSTRAINTS,
                 new GoalEndState(0.0, goalEndRotationHolonomic) // Goal end state. You can set a holonomic rotation
-                                                                                                                                                    // here. If using a differential drivetrain, the
-                                                                                                                                                    // rotation will have no effect.
+                                                                // here. If using a differential drivetrain, the
+                                                                // rotation will have no effect.
         );
 
-        Supplier<Command> pathCommand = () -> AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation delay distance in meters. This is how far the robot should travel
-                                                                                                                      // before attempting to rotate.
+        Supplier<Command> pathCommand = () -> AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation
+                                                                                                                      // delay
+                                                                                                                      // distance
+                                                                                                                      // in
+                                                                                                                      // meters.
+                                                                                                                      // This
+                                                                                                                      // is
+                                                                                                                      // how
+                                                                                                                      // far
+                                                                                                                      // the
+                                                                                                                      // robot
+                                                                                                                      // should
+                                                                                                                      // travel
+                                                                                                                      // before
+                                                                                                                      // attempting
+                                                                                                                      // to
+                                                                                                                      // rotate.
         );
         return pathCommand;
     }
@@ -163,7 +190,15 @@ public class AutoFactory {
 
         var sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(null, null, null, // Use default config
                 (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
-                new SysIdRoutine.Mechanism((Measure<Voltage> voltage) -> subsystem.runVolts(voltage.in(Volts)), null, // No log consumer, since data is recorded by AdvantageKit
+                new SysIdRoutine.Mechanism((Measure<Voltage> voltage) -> subsystem.runVolts(voltage.in(Volts)), null, // No
+                                                                                                                      // log
+                                                                                                                      // consumer,
+                                                                                                                      // since
+                                                                                                                      // data
+                                                                                                                      // is
+                                                                                                                      // recorded
+                                                                                                                      // by
+                                                                                                                      // AdvantageKit
                         subsystem));
         switch (routine) {
             case QUASISTATIC_FORWARD:
