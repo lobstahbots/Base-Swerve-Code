@@ -25,23 +25,20 @@ import frc.robot.subsystems.drive.SwerveKinematicLimits;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
+ * numerical or boolean constants. This class should not be used for any other
+ * purpose. All constants should be declared globally (i.e. public static). Do
+ * not put anything functional in this class.
  *
  * <p>
  * It is advised to statically import this class (or one of its inner classes)
- * wherever the
- * constants are needed, to reduce verbosity.
+ * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
   public static class PathConstants {
     public static final Pose2d TARGET_POSE = new Pose2d(16, 7, Rotation2d.fromDegrees(180));
     public static final Pose2d INITIAL_POSE = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
-    public static final PathConstraints CONSTRAINTS = new PathConstraints(
-        1, 1,
-        Units.degreesToRadians(540), Units.degreesToRadians(720));
+    public static final PathConstraints CONSTRAINTS = new PathConstraints(1, 1, Units.degreesToRadians(540),
+        Units.degreesToRadians(720));
 
     public static final Pose2d STATION_1 = new Pose2d(0.4119143784046173, 7.161474227905273,
         Rotation2d.fromRotations(0));
@@ -85,11 +82,14 @@ public final class Constants {
     public static final int DRIVE_MOTOR_CURRENT_LIMIT = 40;
     public static final int ANGLE_MOTOR_CURRENT_LIMIT = 40;
     public static final Translation2d[] MODULE_LOCATIONS = new Translation2d[] {
-        new Translation2d(RobotConstants.WHEELBASE / 2.0, RobotConstants.TRACK_WIDTH / 2.0),
-        new Translation2d(RobotConstants.WHEELBASE / 2.0, -RobotConstants.TRACK_WIDTH / 2.0),
-        new Translation2d(-RobotConstants.WHEELBASE / 2.0, RobotConstants.TRACK_WIDTH / 2.0),
-        new Translation2d(-RobotConstants.WHEELBASE / 2.0, -RobotConstants.TRACK_WIDTH / 2.0),
-    };
+        new Translation2d(RobotConstants.WHEELBASE / 2.0 - RobotConstants.EDGE_TO_MODULE_CENTER,
+            RobotConstants.TRACK_WIDTH / 2.0 - RobotConstants.EDGE_TO_MODULE_CENTER),
+        new Translation2d(RobotConstants.WHEELBASE / 2.0 - RobotConstants.EDGE_TO_MODULE_CENTER,
+            -RobotConstants.TRACK_WIDTH / 2.0 + RobotConstants.EDGE_TO_MODULE_CENTER),
+        new Translation2d(-RobotConstants.WHEELBASE / 2.0 + RobotConstants.EDGE_TO_MODULE_CENTER,
+            RobotConstants.TRACK_WIDTH / 2.0 - RobotConstants.EDGE_TO_MODULE_CENTER),
+        new Translation2d(-RobotConstants.WHEELBASE / 2.0 + RobotConstants.EDGE_TO_MODULE_CENTER,
+            -RobotConstants.TRACK_WIDTH / 2.0 + RobotConstants.EDGE_TO_MODULE_CENTER), };
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
     public static final SwerveKinematicLimits MODULE_LIMITS = new SwerveKinematicLimits(MAX_DRIVE_SPEED,
         MAX_ACCELERATION, MAX_ANGULAR_SPEED);
@@ -210,7 +210,7 @@ public final class Constants {
         / (APRIL_TAG_NUMBER_CONFIDENCE_SCALE * Math.log(APRIL_TAG_NUMBER_CONFIDENCE_SCALE));
     public static final double APRIL_TAG_AREA_CONFIDENCE_SCALE = 1.7; // Higher makes confidence lower at each area of
                                                                       // AprilTags
-    // See https://www.desmos.com/calculator/i5z7ddbjy4
+                                                                      // See https://www.desmos.com/calculator/i5z7ddbjy4
 
     public static final double AMBIGUITY_TO_STDEV_EXP = 1;
     public static final Vector<N3> BASE_STDEV = VecBuilder.fill(0.1, 0.1, 1000.0); // x, y, angle
