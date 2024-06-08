@@ -237,4 +237,8 @@ public final class Constants {
     public static final int LED_PORT = 0;
     public static final int LED_LENGTH = 100;
   }
+
+  public static class LoggingConstants {
+    public static final double LOG_ALERT_INTERVAL = 5; // Interval (in s) between logs of an alert if its text doesn't change
+  }
 }

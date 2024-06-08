@@ -36,6 +36,8 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.LoggingConstants;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ public class Alert {
     private final AlertType type;
     private boolean active = false;
     private double activeStartTime = 0.0;
+    private double lastLoggedTime = 0.0;
     private String text;
     private BooleanSupplier cond = () -> false;
 
@@ -125,19 +128,7 @@ public class Alert {
      * @param text The new text.
      */
     public void setText(String text) {
-        if (active && !text.equals(this.text)) {
-            switch (type) {
-                case ERROR:
-                    DriverStation.reportError(text, false);
-                    break;
-                case WARNING:
-                    DriverStation.reportWarning(text, false);
-                    break;
-                case INFO:
-                    System.out.println(text);
-                    break;
-            }
-        }
+        if (active && !text.equals(this.text)) log();
         this.text = text;
     }
 
@@ -150,22 +141,25 @@ public class Alert {
      */
     public boolean cond() {
         boolean res = cond.getAsBoolean();
-        if (res && !active) {
-            activeStartTime = Timer.getFPGATimestamp();
-            switch (type) {
-                case ERROR:
-                    DriverStation.reportError(text, false);
-                    break;
-                case WARNING:
-                    DriverStation.reportWarning(text, false);
-                    break;
-                case INFO:
-                    System.out.println(text);
-                    break;
-            }
-        }
+        if (res && !active) activeStartTime = Timer.getFPGATimestamp();
+        if (res && Timer.getFPGATimestamp() - lastLoggedTime > LoggingConstants.LOG_ALERT_INTERVAL) log();
         active = res;
         return res;
+    }
+
+    private void log() {
+        switch (type) {
+            case ERROR:
+                DriverStation.reportError(text, false);
+                break;
+            case WARNING:
+                DriverStation.reportWarning(text, false);
+                break;
+            case INFO:
+                System.out.println(text);
+                break;
+        }
+        lastLoggedTime = Timer.getFPGATimestamp();
     }
 
     private static class SendableAlerts implements Sendable {
