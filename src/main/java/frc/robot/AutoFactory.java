@@ -27,6 +27,13 @@ public class AutoFactory {
     private final Supplier<List<Object>> responses;
     private final DriveBase driveBase;
 
+    /**
+     * Create a new auto factory.
+     * 
+     * @param driveBase         {@link DriveBase} to drive.
+     * @param responsesSupplier Responses to auto chooser questions.
+     * @see stl.auto.AutonSelector
+     */
     public AutoFactory(DriveBase driveBase, Supplier<List<Object>> responsesSupplier) {
         this.responses = responsesSupplier;
         this.driveBase = driveBase;
@@ -57,7 +64,7 @@ public class AutoFactory {
     public Command getPathFindToPoseCommand(Pose2d targetPose) {
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0,  // Goal end velocity in meters/sec
+        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0, // Goal end velocity in meters/sec
                 0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
         ).andThen(new SwerveDriveStopCommand(driveBase));
 
