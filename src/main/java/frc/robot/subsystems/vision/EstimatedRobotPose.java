@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -38,7 +38,7 @@ public class EstimatedRobotPose {
     /** The alternate estimated pose */
     public final Pose3d alternateEstimatedPose;
 
-     /** Ambiguity of the best pose */
+    /** Ambiguity of the best pose */
     public final double bestReprojError;
 
     /** Ambiguity of the alternate pose */
@@ -54,7 +54,7 @@ public class EstimatedRobotPose {
     public final PoseStrategy strategy;
 
     public final int[] fiducialIDsUsed;
-    
+
     public final double totalArea;
 
     public final double multiTagAmbiguity;
@@ -62,30 +62,24 @@ public class EstimatedRobotPose {
     /**
      * Constructs an EstimatedRobotPose
      *
-     * @param estimatedPose estimated pose
+     * @param estimatedPose    estimated pose
      * @param timestampSeconds timestamp of the estimate
      */
-    public EstimatedRobotPose(
-            Pose3d bestEstimatedPose,
-            Pose3d alternateEstimatedPose,
-            double bestReprojErr,
-            double altReprojErr,
-            double timestampSeconds,
-            double ambiguity,
-            List<PhotonTrackedTarget> targetsUsed,
+    public EstimatedRobotPose(Pose3d bestEstimatedPose, Pose3d alternateEstimatedPose, double bestReprojErr,
+            double altReprojErr, double timestampSeconds, double ambiguity, List<PhotonTrackedTarget> targetsUsed,
             PoseStrategy strategy) {
-                var targetsSeen = targetsUsed.size();
-                var visibleFiducialIDs = new int[targetsSeen];
-        
-                double area = 0;
-                
-                for (int i = 0; i < targetsSeen; i++) {
-                    var target = targetsUsed.get(i);
-                    visibleFiducialIDs[i] = target.getFiducialId();
-                    area += target.getArea() / 100; // Area is returned in percent but we want fraction
-                    // See
-                    // https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html#getting-data-from-a-target
-                }
+        var targetsSeen = targetsUsed.size();
+        var visibleFiducialIDs = new int[targetsSeen];
+
+        double area = 0;
+
+        for (int i = 0; i < targetsSeen; i++) {
+            var target = targetsUsed.get(i);
+            visibleFiducialIDs[i] = target.getFiducialId();
+            area += target.getArea() / 100; // Area is returned in percent but we want fraction
+            // See
+            // https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html#getting-data-from-a-target
+        }
         this.bestEstimatedPose = bestEstimatedPose;
         this.alternateEstimatedPose = alternateEstimatedPose;
         this.bestReprojError = bestReprojErr;
