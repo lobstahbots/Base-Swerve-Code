@@ -12,8 +12,8 @@ package frc.robot.subsystems.vision;
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -80,16 +80,23 @@ public class VisionIOSim implements VisionIO {
     private final Field2d dbgField;
     private final Transform3d kEmptyTrf = new Transform3d();
 
+    /**
+     * Create a new simulated {@link VisionIO}. The rear camera is named
+     * {@code photonvision_rear} and the front camera is named
+     * {@code photonvision_front}.
+     */
     public VisionIOSim() {
         addAprilTags(aprilTagFieldLayout);
         this.rearCamera = new PhotonCamera("photonvision_rear");
         this.frontCamera = new PhotonCamera("photonvision_front");
-        this.frontCameraProp.setCalibration(VisionConstants.CAMERA_RES_WIDTH, VisionConstants.CAMERA_RES_HEIGHT, Rotation2d.fromDegrees(VisionConstants.CAMERA_FOV_DEG));
+        this.frontCameraProp.setCalibration(VisionConstants.CAMERA_RES_WIDTH, VisionConstants.CAMERA_RES_HEIGHT,
+                Rotation2d.fromDegrees(VisionConstants.CAMERA_FOV_DEG));
         this.frontCameraProp.setCalibError(VisionConstants.AVG_ERROR_PX, VisionConstants.ERROR_STDEV_PX);
         this.frontCameraProp.setFPS(VisionConstants.FPS);
         this.frontCameraProp.setAvgLatencyMs(VisionConstants.CAMERA_AVG_LATENCY_MS);
         this.frontCameraProp.setLatencyStdDevMs(VisionConstants.CAMERA_LATENCY_STDEV_MS);
-        this.rearCameraProp.setCalibration(VisionConstants.CAMERA_RES_WIDTH, VisionConstants.CAMERA_RES_HEIGHT, Rotation2d.fromDegrees(VisionConstants.CAMERA_FOV_DEG));
+        this.rearCameraProp.setCalibration(VisionConstants.CAMERA_RES_WIDTH, VisionConstants.CAMERA_RES_HEIGHT,
+                Rotation2d.fromDegrees(VisionConstants.CAMERA_FOV_DEG));
         this.rearCameraProp.setCalibError(VisionConstants.AVG_ERROR_PX, VisionConstants.ERROR_STDEV_PX);
         this.rearCameraProp.setFPS(VisionConstants.FPS);
         this.rearCameraProp.setAvgLatencyMs(VisionConstants.CAMERA_AVG_LATENCY_MS);
@@ -111,45 +118,36 @@ public class VisionIOSim implements VisionIO {
         var existing = camSimMap.putIfAbsent(cameraSim.getCamera().getName(), cameraSim);
         if (existing == null) {
             camTrfMap.put(cameraSim, TimeInterpolatableBuffer.createBuffer(kBufferLengthSeconds));
-            camTrfMap
-                    .get(cameraSim)
-                    .addSample(Timer.getFPGATimestamp(), new Pose3d().plus(robotToCamera));
+            camTrfMap.get(cameraSim).addSample(Timer.getFPGATimestamp(), new Pose3d().plus(robotToCamera));
         }
     }
 
     /**
      * Adds targets on the field which your vision system is designed to detect. The
-     * {@link
-     * PhotonCamera}s simulated from this system will report the location of the
-     * camera relative to
-     * the subset of these targets which are visible from the given camera position.
+     * {@link PhotonCamera}s simulated from this system will report the location of
+     * the camera relative to the subset of these targets which are visible from the
+     * given camera position.
      *
      * <p>
      * The AprilTags from this layout will be added as vision targets under the type
-     * "apriltag".
-     * The poses added preserve the tag layout's current alliance origin. If the tag
-     * layout's alliance
-     * origin is changed, these added tags will have to be cleared and re-added.
+     * "apriltag". The poses added preserve the tag layout's current alliance
+     * origin. If the tag layout's alliance origin is changed, these added tags will
+     * have to be cleared and re-added.
      *
      * @param tagLayout The field tag layout to get Apriltag poses and IDs from
      */
     public void addAprilTags(AprilTagFieldLayout tagLayout) {
         for (AprilTag tag : tagLayout.getTags()) {
-            addVisionTargets(
-                    "apriltag",
-                    new VisionTargetSim(
-                            tagLayout.getTagPose(tag.ID).get(), // preserve alliance rotation
-                            TargetModel.kAprilTag36h11,
-                            tag.ID));
+            addVisionTargets("apriltag", new VisionTargetSim(tagLayout.getTagPose(tag.ID).get(), // preserve alliance rotation
+                    TargetModel.kAprilTag36h11, tag.ID));
         }
     }
 
     /**
      * Adds targets on the field which your vision system is designed to detect. The
-     * {@link
-     * PhotonCamera}s simulated from this system will report the location of the
-     * camera relative to
-     * the subset of these targets which are visible from the given camera position.
+     * {@link PhotonCamera}s simulated from this system will report the location of
+     * the camera relative to the subset of these targets which are visible from the
+     * given camera position.
      *
      * @param type    Type of target (e.g. "cargo").
      * @param targets Targets to add to the simulated field
@@ -169,16 +167,10 @@ public class VisionIOSim implements VisionIO {
     public void updateInputs(VisionIOInputs inputs, Pose3d robotPoseMeters) {
         var targetTypes = targetSets.entrySet();
         // update vision targets on field
-        targetTypes.forEach(
-                entry -> dbgField
-                        .getObject(entry.getKey())
-                        .setPoses(
-                                entry.getValue().stream()
-                                        .map(t -> t.getPose().toPose2d())
-                                        .collect(Collectors.toList())));
+        targetTypes.forEach(entry -> dbgField.getObject(entry.getKey())
+                .setPoses(entry.getValue().stream().map(t -> t.getPose().toPose2d()).collect(Collectors.toList())));
 
-        if (robotPoseMeters == null)
-            return;
+        if (robotPoseMeters == null) return;
 
         // save "real" robot poses over time
         double now = Timer.getFPGATimestamp();
@@ -221,8 +213,7 @@ public class VisionIOSim implements VisionIO {
 
             for (var target : camResult.getTargets()) {
                 var trf = target.getBestCameraToTarget();
-                if (trf.equals(kEmptyTrf))
-                    continue;
+                if (trf.equals(kEmptyTrf)) continue;
                 visTgtPoses2d.add(lateCameraPose.transformBy(trf).toPose2d());
             }
 
@@ -259,10 +250,8 @@ public class VisionIOSim implements VisionIO {
             }
 
         }
-        if (processed)
-            dbgField.getObject("visibleTargetPoses").setPoses(visTgtPoses2d);
-        if (!cameraPoses2d.isEmpty())
-            dbgField.getObject("cameras").setPoses(cameraPoses2d);
+        if (processed) dbgField.getObject("visibleTargetPoses").setPoses(visTgtPoses2d);
+        if (!cameraPoses2d.isEmpty()) dbgField.getObject("cameras").setPoses(cameraPoses2d);
     }
 
     public List<PhotonTrackedTarget> getFrontTrackedTargets() {
@@ -284,8 +273,7 @@ public class VisionIOSim implements VisionIO {
 
     /**
      * Get a simulated camera's position relative to the robot. If the requested
-     * camera is invalid, an
-     * empty optional is returned.
+     * camera is invalid, an empty optional is returned.
      *
      * @param cameraSim   The specific camera to get the robot-to-camera transform
      *                    of
@@ -295,11 +283,9 @@ public class VisionIOSim implements VisionIO {
      */
     public Optional<Transform3d> getRobotToCamera(PhotonCameraSim cameraSim, double timeSeconds) {
         var trfBuffer = camTrfMap.get(cameraSim);
-        if (trfBuffer == null)
-            return Optional.empty();
+        if (trfBuffer == null) return Optional.empty();
         var sample = trfBuffer.getSample(timeSeconds);
-        if (sample.isEmpty())
-            return Optional.empty();
+        if (sample.isEmpty()) return Optional.empty();
         return Optional.of(new Transform3d(new Pose3d(), sample.orElse(new Pose3d())));
     }
 

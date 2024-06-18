@@ -30,7 +30,7 @@ public interface VisionIO {
 
         public int[] visibleFrontFiducialIDs = new int[] {};
         public int[] visibleRearFiducialIDs = new int[] {};
-        
+
         public double frontTotalArea = 0.0;
         public double rearTotalArea = 0.0;
     }

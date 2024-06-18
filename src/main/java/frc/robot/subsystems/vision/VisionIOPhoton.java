@@ -28,6 +28,11 @@ public class VisionIOPhoton implements VisionIO {
     private final Alert frontDisconnectedAlert;
     private final Alert rearDisconnectedAlert;
 
+    /**
+     * Create a new {@link VisionIO} instance using PhotonVision cameras & pose
+     * estimation. Rear camera is named {@code photonvision1} and front camera
+     * {@code photonvision2}.
+     */
     public VisionIOPhoton() {
         this.rearCamera = new PhotonCamera("photonvision1");
         this.frontCamera = new PhotonCamera("photonvision2");
@@ -35,8 +40,10 @@ public class VisionIOPhoton implements VisionIO {
                 frontCamera, VisionConstants.ROBOT_TO_FRONT_CAMERA);
         this.rearPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY, rearCamera,
                 VisionConstants.ROBOT_TO_REAR_CAMERA);
-        frontDisconnectedAlert = new Alert("Front camera has disconnected.", AlertType.ERROR, () -> !frontCamera.isConnected());
-        rearDisconnectedAlert = new Alert("Rear camera has disconnected.", AlertType.ERROR, () -> !rearCamera.isConnected());
+        frontDisconnectedAlert = new Alert("Front camera has disconnected.", AlertType.ERROR,
+                () -> !frontCamera.isConnected());
+        rearDisconnectedAlert = new Alert("Rear camera has disconnected.", AlertType.ERROR,
+                () -> !rearCamera.isConnected());
     }
 
     public void updateInputs(VisionIOInputs inputs, Pose3d robotPoseMeters) {
