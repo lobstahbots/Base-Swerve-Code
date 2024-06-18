@@ -75,7 +75,9 @@ public class Alert {
      * 
      * @param text Text to be displayed when the alert is active.
      * @param type {@link AlertType} specifying urgency.
-     * @param cond The condition with which this Alert will be displayed
+     * @param cond The condition with which this Alert will be displayed, as a
+     *             {@link BooleanSupplier}; it will automatically make itself
+     *             active/inactive by regularly calling this condition.
      */
     public Alert(String text, AlertType type, BooleanSupplier cond) {
         this("Alerts", text, type, cond);
@@ -88,7 +90,9 @@ public class Alert {
      * @param group Group identifier, also used as NetworkTables title
      * @param text  Text to be displayed when the alert is active.
      * @param type  {@link AlertType} specifying urgency.
-     * @param cond  The condition with which this Alert will be displayed
+     * @param cond  The condition with which this Alert will be displayed, as a
+     *              {@link BooleanSupplier}; it will automatically make itself
+     *              active/inactive by regularly calling this condition.
      */
     public Alert(String group, String text, AlertType type, BooleanSupplier cond) {
         if (!groups.containsKey(group)) {
@@ -162,9 +166,19 @@ public class Alert {
         lastLoggedTime = Timer.getFPGATimestamp();
     }
 
+    /**
+     * A group of {@link Alert}s which can be sent to a driver dashboard (e.g.
+     * Shuffleboard/elastic).
+     */
     private static class SendableAlerts implements Sendable {
         public final List<Alert> alerts = new ArrayList<>();
 
+        /**
+         * Get text for active alerts, filtered by type and sorted by time.
+         * 
+         * @param type {@link AlertType} to filter for.
+         * @return List of active alert texts.
+         */
         public String[] getAlertStrings(AlertType type) {
             Predicate<Alert> activeFilter = (Alert x) -> x.type == type && x.cond();
             Comparator<Alert> timeSorter = (Alert a1, Alert a2) -> (int) (a2.activeStartTime - a1.activeStartTime);
