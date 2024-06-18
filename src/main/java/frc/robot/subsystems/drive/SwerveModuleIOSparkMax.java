@@ -32,14 +32,16 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
   private final int moduleID;
   private final TemperatureMonitor monitor;
 
-  /** Creates a new SwerveModule for real cases. 
+  /**
+   * Creates a new SwerveModule for real cases.
    * 
-   * @param moduleID The module number (0-3).
-   * @param angleMotorID The CAN ID of the motor controlling the angle.
-   * @param driveMotorID The CAN ID of the motor controlling drive speed.
+   * @param moduleID             The module number (0-3).
+   * @param angleMotorID         The CAN ID of the motor controlling the angle.
+   * @param driveMotorID         The CAN ID of the motor controlling drive speed.
    * @param angularOffsetDegrees The offset angle in degrees.
-  */
-  public SwerveModuleIOSparkMax (int moduleID, String name, int angleMotorID, int driveMotorID, double angularOffsetDegrees, boolean inverted) {
+   */
+  public SwerveModuleIOSparkMax(int moduleID, String name, int angleMotorID, int driveMotorID,
+      double angularOffsetDegrees, boolean inverted) {
     this.moduleID = moduleID;
 
     this.angleMotor = new MonitoredSparkMax(angleMotorID, MotorType.kBrushless, name + " angle motor");
@@ -78,7 +80,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     resetEncoders();
   }
 
-  /**Stops the module motors. */
+  /** Stops the module motors. */
   public void stopMotors() {
     angleMotor.stopMotor();
     driveMotor.stopMotor();
@@ -87,12 +89,13 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
   /**
    * Returns the current state of the module.
    *
-   * @return The current encoder velocities of the module as a {@link SwerveModuleState}.
+   * @return The current encoder velocities of the module as a
+   *         {@link SwerveModuleState}.
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(drivingEncoder.getVelocity(), new Rotation2d(angleAbsoluteEncoder.getPosition() + angularOffset.getRadians()));
+    return new SwerveModuleState(drivingEncoder.getVelocity(),
+        new Rotation2d(angleAbsoluteEncoder.getPosition() + angularOffset.getRadians()));
   }
-  
 
   /**
    * Returns the module ID.
@@ -106,10 +109,12 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
   /**
    * Returns the current position of the module.
    *
-   * @return The current encoder positions position of the module as a {@link SwerveModulePosition}.
+   * @return The current encoder positions position of the module as a
+   *         {@link SwerveModulePosition}.
    */
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(drivingEncoder.getPosition(), new Rotation2d(angleAbsoluteEncoder.getPosition() + angularOffset.getRadians()));
+    return new SwerveModulePosition(drivingEncoder.getPosition(),
+        new Rotation2d(angleAbsoluteEncoder.getPosition() + angularOffset.getRadians()));
   }
 
   /**
@@ -121,7 +126,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     driveMotor.setIdleMode(mode);
   }
 
-   /**
+  /**
    * Sets the braking mode of the turning motor.
    * 
    * @param mode the {@link IdleMode} to set motors to.
@@ -130,12 +135,13 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     angleMotor.setIdleMode(mode);
   }
 
-   /** Zeroes the drive encoder. */
-   public void resetEncoders() {
+  /** Zeroes the drive encoder. */
+  public void resetEncoders() {
     drivingEncoder.setPosition(0);
   }
 
-  /**Sets voltage of driving motor.
+  /**
+   * Sets voltage of driving motor.
    * 
    * @param volts The voltage the motor should be set to.
    */
@@ -143,7 +149,8 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     driveMotor.setVoltage(volts);
   }
 
-  /**Sets voltage of turn motor.
+  /**
+   * Sets voltage of turn motor.
    * 
    * @param volts The voltage the motor should be set to.
    */
@@ -152,22 +159,27 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
   }
 
   public void updateInputs(ModuleIOInputs inputs) {
-    inputs.drivePosition = driveMotor.getLastError() == REVLibError.kOk ? Rotation2d.fromRotations(drivingEncoder.getPosition()) : inputs.drivePosition;
-    inputs.driveVelocityRadPerSec = driveMotor.getLastError() == REVLibError.kOk ? Units.rotationsToRadians(angleAbsoluteEncoder.getVelocity() / 60) : inputs.driveVelocityRadPerSec;
+    inputs.drivePosition = driveMotor.getLastError() == REVLibError.kOk
+        ? Rotation2d.fromRotations(drivingEncoder.getPosition())
+        : inputs.drivePosition;
+    inputs.driveVelocityRadPerSec = driveMotor.getLastError() == REVLibError.kOk
+        ? Units.rotationsToRadians(angleAbsoluteEncoder.getVelocity() / 60)
+        : inputs.driveVelocityRadPerSec;
     inputs.driveAppliedVolts = driveMotor.getAppliedOutput() * driveMotor.getBusVoltage();
-    inputs.driveCurrentAmps = new double[] {driveMotor.getOutputCurrent()};
+    inputs.driveCurrentAmps = new double[] { driveMotor.getOutputCurrent() };
 
-    inputs.turnAbsolutePosition = angleMotor.getLastError() == REVLibError.kOk ? Rotation2d.fromRadians(-angleAbsoluteEncoder.getPosition() - angularOffset.getRadians()) : inputs.turnPosition;
+    inputs.turnAbsolutePosition = angleMotor.getLastError() == REVLibError.kOk
+        ? Rotation2d.fromRadians(-angleAbsoluteEncoder.getPosition() - angularOffset.getRadians())
+        : inputs.turnPosition;
     inputs.turnPosition = inputs.turnAbsolutePosition;
-    inputs.turnVelocityRadPerSec = angleMotor.getLastError() == REVLibError.kOk? angleAbsoluteEncoder.getVelocity() : inputs.turnVelocityRadPerSec;
+    inputs.turnVelocityRadPerSec = angleMotor.getLastError() == REVLibError.kOk ? angleAbsoluteEncoder.getVelocity()
+        : inputs.turnVelocityRadPerSec;
     inputs.turnAppliedVolts = angleMotor.getAppliedOutput() * angleMotor.getBusVoltage();
-    inputs.turnCurrentAmps = new double[] {angleMotor.getOutputCurrent()};
+    inputs.turnCurrentAmps = new double[] { angleMotor.getOutputCurrent() };
     inputs.angularOffset = angularOffset;
   }
 
   public void periodic() {
     monitor.monitor();
   }
-
 }
-
