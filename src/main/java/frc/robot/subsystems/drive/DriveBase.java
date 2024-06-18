@@ -44,14 +44,8 @@ public class DriveBase extends CharacterizableSubsystem {
   private SwerveDrivePoseEstimator swerveOdometry;
   private SwerveDrivePoseEstimator visionLessOdometry;
   private SwerveSetpointGenerator setpointGenerator;
-  private SwerveSetpoint swerveSetpoint = new SwerveSetpoint(
-      new ChassisSpeeds(),
-      new SwerveModuleState[] {
-          new SwerveModuleState(),
-          new SwerveModuleState(),
-          new SwerveModuleState(),
-          new SwerveModuleState()
-      });
+  private SwerveSetpoint swerveSetpoint = new SwerveSetpoint(new ChassisSpeeds(), new SwerveModuleState[] {
+      new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState() });
   private final GyroIO gyro;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private boolean isOpenLoop;
@@ -61,11 +55,24 @@ public class DriveBase extends CharacterizableSubsystem {
 
   private Field2d field;
 
+  /**
+   * Create a new serve drivebase.
+   * 
+   * @param gyroIO       The {@link GyroIO}.
+   * @param photonVision The {@link Vision} instance for odometry and note
+   *                     detection.
+   * @param frontLeft
+   * @param frontRight
+   * @param backLeft
+   * @param backRight
+   * @param isOpenLoop   If true, skip closed-loop (PID) control.
+   */
   public DriveBase(GyroIO gyroIO, Vision photonVision, SwerveModuleIO frontLeft, SwerveModuleIO frontRight,
       SwerveModuleIO backLeft, SwerveModuleIO backRight, boolean isOpenLoop) {
-
-    this.modules = new SwerveModule[] { new SwerveModule(frontLeft, FrontLeftModuleConstants.moduleID), new SwerveModule(frontRight, FrontRightModuleConstants.moduleID),
-         new SwerveModule(backLeft, BackRightModuleConstants.moduleID), new SwerveModule(backRight, BackLeftModuleConstants.moduleID) };
+    this.modules = new SwerveModule[] { new SwerveModule(frontLeft, FrontLeftModuleConstants.moduleID),
+        new SwerveModule(frontRight, FrontRightModuleConstants.moduleID),
+        new SwerveModule(backLeft, BackRightModuleConstants.moduleID),
+        new SwerveModule(backRight, BackLeftModuleConstants.moduleID) };
 
     this.gyro = gyroIO;
 
@@ -74,7 +81,7 @@ public class DriveBase extends CharacterizableSubsystem {
     swerveOdometry = new SwerveDrivePoseEstimator(DriveConstants.KINEMATICS, gyroInputs.yawPosition, getPositions(),
         new Pose2d());
     visionLessOdometry = new SwerveDrivePoseEstimator(DriveConstants.KINEMATICS, gyroInputs.yawPosition, getPositions(),
-    new Pose2d());
+        new Pose2d());
     setpointGenerator = new SwerveSetpointGenerator(DriveConstants.KINEMATICS, DriveConstants.MODULE_LOCATIONS);
 
     field = new Field2d();
@@ -140,27 +147,28 @@ public class DriveBase extends CharacterizableSubsystem {
     return DriveConstants.KINEMATICS.toChassisSpeeds(getStates());
   }
 
-/**
- * Drives the robot robot-relative according to provided {@link ChassisSpeeds}.
- * 
- * @param chassisSpeeds The desired ChassisSpeeds. Should be robot relative.
- */
-public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
-  ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
-  Logger.recordOutput("Unoptimized:", DriveConstants.KINEMATICS.toSwerveModuleStates(discreteSpeeds));
-  swerveSetpoint = setpointGenerator.generateSetpoint(DriveConstants.MODULE_LIMITS, new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), discreteSpeeds, SimConstants.LOOP_TIME);
-  SwerveDriveKinematics.desaturateWheelSpeeds(swerveSetpoint.moduleStates, DriveConstants.MAX_DRIVE_SPEED);
-  setModuleStates(swerveSetpoint.moduleStates);
-}
+  /**
+   * Drives the robot robot-relative according to provided {@link ChassisSpeeds}.
+   * 
+   * @param chassisSpeeds The desired ChassisSpeeds. Should be robot relative.
+   */
+  public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
+    Logger.recordOutput("Unoptimized:", DriveConstants.KINEMATICS.toSwerveModuleStates(discreteSpeeds));
+    swerveSetpoint = setpointGenerator.generateSetpoint(DriveConstants.MODULE_LIMITS,
+        new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), discreteSpeeds, SimConstants.LOOP_TIME);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveSetpoint.moduleStates, DriveConstants.MAX_DRIVE_SPEED);
+    setModuleStates(swerveSetpoint.moduleStates);
+  }
 
   /**
-   * Sets desired SwerveModuleStates. Optimizes states.
+   * Sets desired {@link SwerveModuleState}s. Optimizes states.
    * 
    * @param desiredStates The states to set for each module.
    * @return The optimized SwerveModuleStates, now desired states.
    */
   public SwerveModuleState[] setModuleStates(SwerveModuleState[] desiredStates) {
-     SwerveModuleState[] optimizedStates = new SwerveModuleState[4];
+    SwerveModuleState[] optimizedStates = new SwerveModuleState[4];
     // SwerveDriveKinematics.desaturateWheelSpeeds(
     // desiredStates, DriveConstants.MAX_DRIVE_SPEED);
     for (SwerveModule module : modules) {
@@ -170,7 +178,7 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
     Logger.recordOutput("SwerveStates/Desired", desiredStates);
     Logger.recordOutput("SwerveStates/Optimized", swerveSetpoint.moduleStates);
     Logger.recordOutput("SwerveStates/SetpointSpeeds", swerveSetpoint.chassisSpeeds);
-     return optimizedStates;
+    return optimizedStates;
   }
 
   /**
@@ -187,10 +195,8 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
       angle = getPose().getRotation();
     }
     return new ChassisSpeeds(
-        robotRelativeSpeeds.vxMetersPerSecond * angle.getCos()
-            - robotRelativeSpeeds.vyMetersPerSecond * angle.getSin(),
-        robotRelativeSpeeds.vyMetersPerSecond * angle.getCos()
-            + robotRelativeSpeeds.vxMetersPerSecond * angle.getSin(),
+        robotRelativeSpeeds.vxMetersPerSecond * angle.getCos() - robotRelativeSpeeds.vyMetersPerSecond * angle.getSin(),
+        robotRelativeSpeeds.vyMetersPerSecond * angle.getCos() + robotRelativeSpeeds.vxMetersPerSecond * angle.getSin(),
         robotRelativeSpeeds.omegaRadiansPerSecond);
   }
 
@@ -200,14 +206,14 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
    * @param mode The braking mode (Coast or Brake) of the swerve module motors.
    */
   public void setIdleMode(IdleMode mode) {
-    for(SwerveModule module: modules) {
+    for (SwerveModule module : modules) {
       module.setIdleMode(mode);
     }
   }
 
-  /**Stops all of the modules' motors. */
+  /** Stops all of the modules' motors. */
   public void stopMotors() {
-    for(SwerveModule module: modules) {
+    for (SwerveModule module : modules) {
       module.stop();
     }
   }
@@ -231,14 +237,19 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
   /**
    * Gets gyro angle
    * 
-   * @return The angle of the gyro as a {@link} Rotation2d.
+   * @return The angle of the gyro as a {@link Rotation2d}.
    */
   public Rotation2d getGyroAngle() {
     return gyroInputs.yawPosition;
   }
 
   @Override
-  /** Runs motors during characterization voltage ramp routines. */
+  /** 
+   * Runs motors during characterization voltage ramp routines.
+   * 
+   * @param Voltage to run motors at.
+   * @see CharacterizableSubsystem
+   */
   public void runVolts(double volts) {
     for (SwerveModule module : modules) {
       module.runVolts(volts);
@@ -247,7 +258,6 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
 
   @Override
   public void periodic() {
-
     if (Robot.isSimulation()) {
       var twist = DriveConstants.KINEMATICS.toTwist2d(getPositions());
       simRotation = gyroInputs.yawPosition.plus(Rotation2d.fromDegrees(twist.dtheta));
@@ -261,27 +271,35 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
     }
     SmartDashboard.putBoolean("Has seen tag", hasSeenTag);
     Poses estimatedPoses = photonVision.getEstimatedPose(getPose());
-    if (estimatedPoses.frontPose().isPresent() && (hasSeenTag == false || LobstahMath.getDistBetweenPoses(estimatedPoses.frontPose().get().toPose2d(),
-    getPose()) <= 1)) {
-        if(hasSeenTag == false) {
-           resetPose(new Pose2d(estimatedPoses.frontPose().get().getX(), estimatedPoses.frontPose().get().getY(), getGyroAngle()));
-           hasSeenTag = true;
-        }
-        Logger.recordOutput("Front Pose", estimatedPoses.frontPose().get());
-        Logger.recordOutput("Front Stdev", estimatedPoses.frontStdev().toString());
-        swerveOdometry.addVisionMeasurement(estimatedPoses.frontPose().get().toPose2d(), Timer.getFPGATimestamp(), VecBuilder.fill(0.1, 0.1, 0.2));
-     } if (estimatedPoses.rearPose().isPresent() && (hasSeenTag == false || LobstahMath.getDistBetweenPoses(estimatedPoses.rearPose().get().toPose2d(),
-    getPose()) <= 1)) {
-        if(hasSeenTag == false) {
-            resetPose(new Pose2d(estimatedPoses.rearPose().get().getX(), estimatedPoses.rearPose().get().getY(), getGyroAngle()));
-            hasSeenTag = true;
-          } 
-        Logger.recordOutput("Rear Pose", estimatedPoses.rearPose().get());
-        Logger.recordOutput("Rear Stdev", estimatedPoses.rearStdev().toString());
-        swerveOdometry.addVisionMeasurement(estimatedPoses.rearPose().get().toPose2d(), Timer.getFPGATimestamp(), VecBuilder.fill(0.1, 0.1, 0.2));
-     }
-    resetPose(new Pose2d(MathUtil.clamp(getPose().getX(), RobotConstants.TRACK_WIDTH/2, 16.5 - RobotConstants.TRACK_WIDTH / 2), MathUtil.clamp(getPose().getY(), RobotConstants.TRACK_WIDTH/2, 8 - RobotConstants.TRACK_WIDTH/2), getPose().getRotation()));
-     field.setRobotPose(getPose());
+    if (estimatedPoses.frontPose().isPresent() && (hasSeenTag == false
+        || LobstahMath.getDistBetweenPoses(estimatedPoses.frontPose().get().toPose2d(), getPose()) <= 1)) {
+      if (hasSeenTag == false) {
+        resetPose(new Pose2d(estimatedPoses.frontPose().get().getX(), estimatedPoses.frontPose().get().getY(),
+            getGyroAngle()));
+        hasSeenTag = true;
+      }
+      Logger.recordOutput("Front Pose", estimatedPoses.frontPose().get());
+      Logger.recordOutput("Front Stdev", estimatedPoses.frontStdev().toString());
+      swerveOdometry.addVisionMeasurement(estimatedPoses.frontPose().get().toPose2d(), Timer.getFPGATimestamp(),
+          VecBuilder.fill(0.1, 0.1, 0.2));
+    }
+    if (estimatedPoses.rearPose().isPresent() && (hasSeenTag == false
+        || LobstahMath.getDistBetweenPoses(estimatedPoses.rearPose().get().toPose2d(), getPose()) <= 1)) {
+      if (hasSeenTag == false) {
+        resetPose(
+            new Pose2d(estimatedPoses.rearPose().get().getX(), estimatedPoses.rearPose().get().getY(), getGyroAngle()));
+        hasSeenTag = true;
+      }
+      Logger.recordOutput("Rear Pose", estimatedPoses.rearPose().get());
+      Logger.recordOutput("Rear Stdev", estimatedPoses.rearStdev().toString());
+      swerveOdometry.addVisionMeasurement(estimatedPoses.rearPose().get().toPose2d(), Timer.getFPGATimestamp(),
+          VecBuilder.fill(0.1, 0.1, 0.2));
+    }
+    resetPose(new Pose2d(
+        MathUtil.clamp(getPose().getX(), RobotConstants.TRACK_WIDTH / 2, 16.5 - RobotConstants.TRACK_WIDTH / 2),
+        MathUtil.clamp(getPose().getY(), RobotConstants.TRACK_WIDTH / 2, 8 - RobotConstants.TRACK_WIDTH / 2),
+        getPose().getRotation()));
+    field.setRobotPose(getPose());
     Logger.recordOutput("Odometry", getPose());
     Logger.recordOutput("Vision Less", visionLessOdometry.getEstimatedPosition());
     gyro.updateInputs(gyroInputs);
@@ -304,22 +322,10 @@ public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
       // Log 3D odometry pose
       Pose3d robotPose3d = new Pose3d(getPose());
       robotPose3d = robotPose3d
-          .exp(
-              new Twist3d(
-                  0.0,
-                  0.0,
-                  Math.abs(gyroInputs.pitchPosition.getRadians()) * RobotConstants.TRACK_WIDTH / 2.0,
-                  0.0,
-                  gyroInputs.pitchPosition.getRadians(),
-                  0.0))
-          .exp(
-              new Twist3d(
-                  0.0,
-                  0.0,
-                  Math.abs(gyroInputs.rollPosition.getRadians()) * RobotConstants.TRACK_WIDTH / 2.0,
-                  gyroInputs.rollPosition.getRadians(),
-                  0.0,
-                  0.0));
+          .exp(new Twist3d(0.0, 0.0, Math.abs(gyroInputs.pitchPosition.getRadians()) * RobotConstants.TRACK_WIDTH / 2.0,
+              0.0, gyroInputs.pitchPosition.getRadians(), 0.0))
+          .exp(new Twist3d(0.0, 0.0, Math.abs(gyroInputs.rollPosition.getRadians()) * RobotConstants.TRACK_WIDTH / 2.0,
+              gyroInputs.rollPosition.getRadians(), 0.0, 0.0));
 
       Pose3d frontLeftPose3d = new Pose3d(getPose()).plus(VisionConstants.ROBOT_TO_FRONT_CAMERA);
       Pose3d backRightPose3d = new Pose3d(getPose()).plus(VisionConstants.ROBOT_TO_REAR_CAMERA);
