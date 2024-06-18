@@ -244,7 +244,7 @@ public class DriveBase extends CharacterizableSubsystem {
   }
 
   @Override
-  /** 
+  /**
    * Runs motors during characterization voltage ramp routines.
    * 
    * @param Voltage to run motors at.
@@ -281,7 +281,7 @@ public class DriveBase extends CharacterizableSubsystem {
       Logger.recordOutput("Front Pose", estimatedPoses.frontPose().get());
       Logger.recordOutput("Front Stdev", estimatedPoses.frontStdev().toString());
       swerveOdometry.addVisionMeasurement(estimatedPoses.frontPose().get().toPose2d(), Timer.getFPGATimestamp(),
-          VecBuilder.fill(0.1, 0.1, 0.2));
+          estimatedPoses.frontStdev().get());
     }
     if (estimatedPoses.rearPose().isPresent() && (hasSeenTag == false
         || LobstahMath.getDistBetweenPoses(estimatedPoses.rearPose().get().toPose2d(), getPose()) <= 1)) {
@@ -293,7 +293,7 @@ public class DriveBase extends CharacterizableSubsystem {
       Logger.recordOutput("Rear Pose", estimatedPoses.rearPose().get());
       Logger.recordOutput("Rear Stdev", estimatedPoses.rearStdev().toString());
       swerveOdometry.addVisionMeasurement(estimatedPoses.rearPose().get().toPose2d(), Timer.getFPGATimestamp(),
-          VecBuilder.fill(0.1, 0.1, 0.2));
+          estimatedPoses.rearStdev().get());
     }
     resetPose(new Pose2d(
         MathUtil.clamp(getPose().getX(), RobotConstants.TRACK_WIDTH / 2, 16.5 - RobotConstants.TRACK_WIDTH / 2),
