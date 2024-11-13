@@ -5,11 +5,13 @@
 package frc.robot;
 
 import java.io.File;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.can.CANStatus;
@@ -50,6 +52,8 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
         Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
         Logger.recordMetadata("Lobstah Bots", "2024 Robot Code");
+
+        Logger.registerURCL(URCL.startExternal());
 
         File log = new File(Filesystem.getOperatingDirectory(), "log");
         String logPath = log.getAbsolutePath();
