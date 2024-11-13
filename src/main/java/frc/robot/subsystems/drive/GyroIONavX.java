@@ -4,13 +4,14 @@
 
 package frc.robot.subsystems.drive;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /** Add your docs here. */
 public class GyroIONavX implements GyroIO {
-    private final AHRS gyro = new AHRS();
+    private final AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
 
     public GyroIONavX(){
         gyro.zeroYaw();

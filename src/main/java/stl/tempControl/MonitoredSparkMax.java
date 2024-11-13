@@ -4,12 +4,12 @@
 
 package stl.tempControl;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.spark.SparkMax;
 
 import stl.tempControl.TemperatureMonitor.Monitorable;
 
 /** A temperature-monitored SPARK MAX motor controller. */
-public class MonitoredSparkMax extends CANSparkMax implements Monitorable {
+public class MonitoredSparkMax extends SparkMax implements Monitorable {
   private boolean disabled = false;
   private final String label;
   

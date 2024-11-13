@@ -4,12 +4,16 @@
 
 package frc.robot;
 
-import frc.robot.subsystems.vision.PhotonPoseEstimator.PoseStrategy;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
 
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -20,7 +24,10 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.robot.subsystems.drive.SwerveKinematicLimits;
 
 /**
@@ -71,7 +78,10 @@ public final class Constants {
     public static final double RADIUS = Math.sqrt(2 * Math.pow(WHEELBASE / 2 - EDGE_TO_MODULE_CENTER, 2));
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(3);
     public static final double DRIVE_GEAR_RATIO = 4.71;
-    public static final double ANGLE_GEAR_RATIO = 6.1;
+    public static final double ANGLE_GEAR_RATIO = 9424 / 203;
+    public static final double MAX_DRIVE_SPEED = 5.23; // from https://www.reca.lc/drive
+    public static final Mass WEIGHT = Pounds.of(40);
+    public static final MomentOfInertia MOI = KilogramSquareMeters.of(1.4988172);
   }
 
   public static class DriveConstants {
@@ -106,13 +116,19 @@ public final class Constants {
 
     public static final double TURN_DEADBAND = Units.degreesToRadians(5);
 
-    public static final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(2.25, 0.0, 0), // Translation PID constants
-        new PIDConstants(0.5, 0.0, 0), // Rotation PID constants
-        0.1, // Max module speed, in m/s
-        RobotConstants.RADIUS, // Drive base radius in meters. Distance from robot center to furthest module.
-        new ReplanningConfig(true, false) // Default path replanning config. See the API for the options
+    public static final RobotConfig ROBOT_CONFIG = new RobotConfig(RobotConstants.WEIGHT, // Robot mass
+        RobotConstants.MOI, // Robot moment of inertia
+        new ModuleConfig(RobotConstants.WHEEL_DIAMETER / 2, // wheel diameter
+            RobotConstants.MAX_DRIVE_SPEED, // max drive velocity (m/s)
+            1, // cof between wheels and ground
+            DCMotor.getNEO(1).withReduction(RobotConstants.DRIVE_GEAR_RATIO), // DCMotor representing motor, including reduction
+            DRIVE_MOTOR_CURRENT_LIMIT, // current limit for drive motors
+            1 // number of drive motors per module
+        ), Meters.of(RobotConstants.TRACK_WIDTH), // robot track width
+        Meters.of(RobotConstants.WHEELBASE) // robot wheel base
     );
+    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.5, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2.25, 0.0, 0);
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
@@ -153,6 +169,10 @@ public final class Constants {
     public static final double KS = 0.1;
     public static final double KA = 0.1;
     public static final double KV = 0.1;
+
+    public static final double ANGLE_KS = 0.1;
+    public static final double ANGLE_KA = 0.1;
+    public static final double ANGLE_KV = 0.1;
 
     public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = 1;
     public static final double DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR = DRIVING_ENCODER_POSITION_CONVERSION_FACTOR

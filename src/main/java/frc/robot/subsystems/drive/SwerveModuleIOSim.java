@@ -7,15 +7,21 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.Constants.SimConstants;
+import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModuleIOSim implements SwerveModuleIO {
   /** Creates a new SwerveModuleSim. */
-  private DCMotorSim simDriveMotor = new DCMotorSim(DCMotor.getNEO(1), RobotConstants.DRIVE_GEAR_RATIO, 0.025);
-  private DCMotorSim simAngleMotor = new DCMotorSim(DCMotor.getNEO(1), RobotConstants.ANGLE_GEAR_RATIO, 0.025);
+  private DCMotor driveMotor = DCMotor.getNEO(1).withReduction(RobotConstants.DRIVE_GEAR_RATIO);
+  private DCMotor angleMotor = DCMotor.getNeo550(1).withReduction(RobotConstants.ANGLE_GEAR_RATIO);
+  private DCMotorSim simDriveMotor = new DCMotorSim(
+      LinearSystemId.createDCMotorSystem(SwerveConstants.KV, SwerveConstants.KA), driveMotor, 0.025, 0.025);
+  private DCMotorSim simAngleMotor = new DCMotorSim(
+      LinearSystemId.createDCMotorSystem(SwerveConstants.ANGLE_KV, SwerveConstants.ANGLE_KA), angleMotor, 0.025, 0.025);
 
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;

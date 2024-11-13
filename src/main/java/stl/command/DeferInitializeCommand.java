@@ -14,7 +14,7 @@ public class DeferInitializeCommand extends Command {
 
   public DeferInitializeCommand(Supplier<Command> commandSupplier) {
     this.commandSupplier = commandSupplier;
-    m_requirements.addAll(commandSupplier.get().getRequirements());
+    addRequirements(commandSupplier.get().getRequirements());
   }
 
   @Override

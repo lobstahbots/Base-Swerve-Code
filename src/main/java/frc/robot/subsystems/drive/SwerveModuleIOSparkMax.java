@@ -9,15 +9,17 @@ import java.util.Arrays;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.EncoderConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SwerveConstants;
 import stl.tempControl.MonitoredSparkMax;
@@ -47,31 +49,23 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     this.angleMotor = new MonitoredSparkMax(angleMotorID, MotorType.kBrushless, name + " angle motor");
     this.driveMotor = new MonitoredSparkMax(driveMotorID, MotorType.kBrushless, name + " drive motor");
 
-    angleMotor.restoreFactoryDefaults();
-    driveMotor.restoreFactoryDefaults();
-    driveMotor.setIdleMode(IdleMode.kBrake);
-    angleMotor.setIdleMode(IdleMode.kBrake);
-    driveMotor.setSmartCurrentLimit(DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT);
-    angleMotor.setSmartCurrentLimit(DriveConstants.ANGLE_MOTOR_CURRENT_LIMIT);
-    driveMotor.enableVoltageCompensation(12.0);
-    angleMotor.enableVoltageCompensation(12.0);
-    angleMotor.setInverted(false);
-    driveMotor.setInverted(false);
+    var driveEncoderConfig = new EncoderConfig()
+        .positionConversionFactor(SwerveConstants.DRIVING_ENCODER_POSITION_CONVERSION_FACTOR)
+        .velocityConversionFactor(SwerveConstants.DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR);
+    var driveMotorConfig = new SparkMaxConfig().apply(driveEncoderConfig)
+        .smartCurrentLimit(DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT).idleMode(IdleMode.kBrake).voltageCompensation(12)
+        .inverted(false);
+    driveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    var angleMotorConfig = new SparkMaxConfig().smartCurrentLimit(DriveConstants.ANGLE_MOTOR_CURRENT_LIMIT)
+        .idleMode(IdleMode.kBrake).voltageCompensation(12).inverted(false);
+    angleMotorConfig.absoluteEncoder
+        .positionConversionFactor(SwerveConstants.TURNING_ENCODER_POSITION_CONVERSION_FACTOR)
+        .velocityConversionFactor(SwerveConstants.TURNING_ENCODER_VELOCITY_CONVERSION_FACTOR);
+    angleMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     drivingEncoder = driveMotor.getEncoder();
-    angleAbsoluteEncoder = angleMotor.getAbsoluteEncoder(Type.kDutyCycle);
-
-    angleAbsoluteEncoder.setPositionConversionFactor(SwerveConstants.TURNING_ENCODER_POSITION_CONVERSION_FACTOR);
-    angleAbsoluteEncoder.setVelocityConversionFactor(SwerveConstants.TURNING_ENCODER_VELOCITY_CONVERSION_FACTOR);
-
-    drivingEncoder.setPositionConversionFactor(SwerveConstants.DRIVING_ENCODER_POSITION_CONVERSION_FACTOR);
-    drivingEncoder.setVelocityConversionFactor(SwerveConstants.DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR);
-
-    Timer.delay(0.5);
-    driveMotor.burnFlash();
-    Timer.delay(0.5);
-    angleMotor.burnFlash();
-    Timer.delay(0.5);
+    angleAbsoluteEncoder = angleMotor.getAbsoluteEncoder();
 
     monitor = new TemperatureMonitor(Arrays.asList(driveMotor, angleMotor));
 
@@ -123,7 +117,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
    * @param mode the {@link IdleMode} to set motors to.
    */
   public void setDriveIdleMode(IdleMode mode) {
-    driveMotor.setIdleMode(mode);
+    driveMotor.configure(new SparkMaxConfig().idleMode(mode), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   /**
@@ -132,7 +126,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
    * @param mode the {@link IdleMode} to set motors to.
    */
   public void setTurnIdleMode(IdleMode mode) {
-    angleMotor.setIdleMode(mode);
+    angleMotor.configure(new SparkMaxConfig().idleMode(mode), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   /** Zeroes the drive encoder. */

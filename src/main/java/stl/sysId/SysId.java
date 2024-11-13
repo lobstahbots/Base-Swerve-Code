@@ -2,8 +2,7 @@ package stl.sysId;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -26,7 +25,7 @@ public class SysId {
           (state) -> Logger.recordOutput("SysIdTestState", state.toString())
         ),
         new SysIdRoutine.Mechanism(
-          (Measure<Voltage> voltage) -> subsystem.runVolts(voltage.in(Volts)),
+          (Voltage voltage) -> subsystem.runVolts(voltage.in(Volts)),
           null, // No log consumer, since data is recorded by AdvantageKit
           subsystem
         )

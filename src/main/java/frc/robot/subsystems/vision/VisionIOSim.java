@@ -39,6 +39,7 @@ import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionTargetSim;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTag;
@@ -55,18 +56,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.VisionConstants;
 
 public class VisionIOSim implements VisionIO {
-    private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+    private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2024Crescendo);
     private final PhotonCamera frontCamera;
     private final PhotonCamera rearCamera;
     private final SimCameraProperties frontCameraProp = new SimCameraProperties();
     private final SimCameraProperties rearCameraProp = new SimCameraProperties();
     private final PhotonCameraSim frontCameraSim;
     private final PhotonCameraSim rearCameraSim;
-    private final PhotonPoseEstimator frontPoseEstimator;
-    private final PhotonPoseEstimator rearPoseEstimator;
-    private EstimatedRobotPose estimatedFrontPose = new EstimatedRobotPose(new Pose3d(), new Pose3d(), 0, 0, 0, 0,
+    private final LobstahPoseEstimator frontPoseEstimator;
+    private final LobstahPoseEstimator rearPoseEstimator;
+    private LobstahEstimatedRobotPose estimatedFrontPose = new LobstahEstimatedRobotPose(new Pose3d(), new Pose3d(), 0, 0, 0, 0,
             new ArrayList<PhotonTrackedTarget>(), VisionConstants.POSE_STRATEGY);
-    private EstimatedRobotPose estimatedRearPose = new EstimatedRobotPose(new Pose3d(), new Pose3d(), 0, 0, 0, 0,
+    private LobstahEstimatedRobotPose estimatedRearPose = new LobstahEstimatedRobotPose(new Pose3d(), new Pose3d(), 0, 0, 0, 0,
             new ArrayList<PhotonTrackedTarget>(), VisionConstants.POSE_STRATEGY);
     private final Map<String, PhotonCameraSim> camSimMap = new HashMap<>();
     private static final double kBufferLengthSeconds = 1.5;
@@ -105,9 +107,9 @@ public class VisionIOSim implements VisionIO {
         this.rearCameraSim = new PhotonCameraSim(rearCamera, rearCameraProp);
         addCamera(frontCameraSim, VisionConstants.ROBOT_TO_FRONT_CAMERA);
         addCamera(rearCameraSim, VisionConstants.ROBOT_TO_REAR_CAMERA);
-        this.frontPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY,
+        this.frontPoseEstimator = new LobstahPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY,
                 VisionConstants.ROBOT_TO_FRONT_CAMERA);
-        this.rearPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY,
+        this.rearPoseEstimator = new LobstahPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY,
                 VisionConstants.ROBOT_TO_REAR_CAMERA);
         dbgField = new Field2d();
         String tableName = "VisionSystemSim-main";
@@ -194,8 +196,8 @@ public class VisionIOSim implements VisionIO {
             long timestampNT = optTimestamp.get();
             // this result's processing latency in milliseconds
             double latencyMillis = camSim.prop.estLatencyMs();
-            // the image capture timestamp in seconds of this result
-            double timestampCapture = timestampNT / 1e6 - latencyMillis / 1e3;
+            // the image capture timestamp in microseconds of this result
+            long timestampCapture = timestampNT - (long) (latencyMillis * 1e3);
 
             // use camera pose from the image capture timestamp
             Pose3d lateRobotPose = getRobotPose(timestampCapture);
@@ -204,7 +206,9 @@ public class VisionIOSim implements VisionIO {
 
             // process a PhotonPipelineResult with visible targets
             var camResult = camSim.process(latencyMillis, lateCameraPose, allTargets);
-            camResult.setTimestampSeconds(timestampCapture);
+            camResult = new PhotonPipelineResult(camResult.metadata.sequenceID, timestampCapture,
+                    camResult.metadata.publishTimestampMicros, camResult.metadata.timeSinceLastPong,
+                    camResult.getTargets(), camResult.getMultiTagResult());
             // pipelineResults.put(camSim.getCamera().getName(), camResult);
 
             // publish this info to NT at estimated timestamp of receive
@@ -218,7 +222,7 @@ public class VisionIOSim implements VisionIO {
             }
 
             if (camSim.getCamera().getName().equals(frontCamera.getName())) {
-                Optional<EstimatedRobotPose> frontPoseOptional = frontPoseEstimator.update(camResult);
+                Optional<LobstahEstimatedRobotPose> frontPoseOptional = frontPoseEstimator.update(camResult);
                 if (frontPoseOptional.isPresent()) {
                     estimatedFrontPose = frontPoseOptional.get();
                     inputs.bestEstimatedFrontPose = estimatedFrontPose.bestEstimatedPose;
@@ -233,7 +237,7 @@ public class VisionIOSim implements VisionIO {
                     inputs.frontAmbiguity = estimatedFrontPose.multiTagAmbiguity;
                 }
             } else {
-                Optional<EstimatedRobotPose> rearPoseOptional = rearPoseEstimator.update(camResult);
+                Optional<LobstahEstimatedRobotPose> rearPoseOptional = rearPoseEstimator.update(camResult);
                 if (rearPoseOptional.isPresent()) {
                     estimatedRearPose = rearPoseOptional.get();
                     inputs.bestEstimatedRearPose = estimatedRearPose.bestEstimatedPose;

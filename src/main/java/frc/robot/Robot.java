@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-import org.littletonrobotics.urcl.URCL;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.can.CANStatus;
@@ -69,7 +68,6 @@ public class Robot extends LoggedRobot {
             }
         }
         DataLogManager.start();
-        URCL.start();
         Logger.start();
 
         m_robotContainer = new RobotContainer();
