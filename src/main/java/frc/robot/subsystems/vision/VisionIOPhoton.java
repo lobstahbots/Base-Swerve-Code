@@ -12,9 +12,9 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants.VisionConstants;
-import stl.networkalerts.Alert;
-import stl.networkalerts.Alert.AlertType;
 
 public class VisionIOPhoton implements VisionIO {
     private final PhotonCamera frontCamera;
@@ -42,10 +42,10 @@ public class VisionIOPhoton implements VisionIO {
                 VisionConstants.ROBOT_TO_FRONT_CAMERA);
         this.rearPoseEstimator = new LobstahPoseEstimator(aprilTagFieldLayout, VisionConstants.POSE_STRATEGY,
                 VisionConstants.ROBOT_TO_REAR_CAMERA);
-        frontDisconnectedAlert = new Alert("Front camera has disconnected.", AlertType.ERROR,
-                () -> !frontCamera.isConnected());
-        rearDisconnectedAlert = new Alert("Rear camera has disconnected.", AlertType.ERROR,
-                () -> !rearCamera.isConnected());
+        frontDisconnectedAlert = new Alert("Front camera has disconnected.", AlertType.kError);
+        rearDisconnectedAlert = new Alert("Rear camera has disconnected.", AlertType.kError);
+        frontDisconnectedAlert.set(false);
+        rearDisconnectedAlert.set(false);
     }
 
     public void updateInputs(VisionIOInputs inputs, Pose3d robotPoseMeters) {
@@ -74,6 +74,7 @@ public class VisionIOPhoton implements VisionIO {
                 inputs.altFrontReprojErr = 0;
             }
         }
+        frontDisconnectedAlert.set(!frontCamera.isConnected());
 
         List<PhotonPipelineResult> rearPoseResults = rearCamera.getAllUnreadResults();
         if (rearPoseResults.size() > 0) {
@@ -100,6 +101,7 @@ public class VisionIOPhoton implements VisionIO {
                 inputs.altRearReprojErr = 0;
             }
         }
+        rearDisconnectedAlert.set(!rearCamera.isConnected());
     }
 
     public List<PhotonTrackedTarget> getFrontTrackedTargets() {

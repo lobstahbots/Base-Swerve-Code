@@ -7,10 +7,10 @@ package stl.tempControl;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants.TempConstants;
-import stl.networkalerts.Alert;
-import stl.networkalerts.Alert.AlertType;
 
 /**
  * Class to monitor the temperature of some items.
@@ -65,7 +65,7 @@ public class TemperatureMonitor {
                     TempConstants.OVERHEAT_TEMP,
                     TempConstants.SAFE_TEMP
                 ),
-                AlertType.ERROR
+                AlertType.kError
             ));
         }
         this.disableAll = disableAll;
