@@ -68,7 +68,7 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(replayPath, "_replay")));
                 setUseTiming(false); // Run as fast as possible
             } else {
-                Logger.addDataReceiver(new WPILOGWriter(logPath, 0.02)); // Save outputs to a new log
+                Logger.addDataReceiver(new WPILOGWriter(logPath)); // Save outputs to a new log
             }
         }
         DataLogManager.start();
