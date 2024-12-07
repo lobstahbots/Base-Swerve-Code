@@ -174,10 +174,6 @@ public final class Constants {
     public static final double ANGLE_KA = 0.1;
     public static final double ANGLE_KV = 0.1;
 
-    public static final double ANGLE_KS = 0.1;
-    public static final double ANGLE_KA = 0.1;
-    public static final double ANGLE_KV = 0.1;
-
     public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = 1 / RobotConstants.DRIVE_GEAR_RATIO;
     public static final double DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR = DRIVING_ENCODER_POSITION_CONVERSION_FACTOR
         / 60.0;
