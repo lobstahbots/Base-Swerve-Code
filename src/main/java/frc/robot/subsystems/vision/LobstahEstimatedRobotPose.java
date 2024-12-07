@@ -25,13 +25,15 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import frc.robot.subsystems.vision.PhotonPoseEstimator.PoseStrategy;
 
 import java.util.List;
+
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** An estimated pose based on pipeline result */
-public class EstimatedRobotPose {
+public class LobstahEstimatedRobotPose extends EstimatedRobotPose {
     /** The best estimated pose */
     public final Pose3d bestEstimatedPose;
 
@@ -44,15 +46,6 @@ public class EstimatedRobotPose {
     /** Ambiguity of the alternate pose */
     public final double altReprojError;
 
-    /** The estimated time the frame used to derive the robot pose was taken */
-    public final double timestampSeconds;
-
-    /** A list of the targets used to compute this pose */
-    public final List<PhotonTrackedTarget> targetsUsed;
-
-    /** The strategy actually used to produce this pose */
-    public final PoseStrategy strategy;
-
     public final int[] fiducialIDsUsed;
 
     public final double totalArea;
@@ -60,14 +53,20 @@ public class EstimatedRobotPose {
     public final double multiTagAmbiguity;
 
     /**
-     * Constructs an EstimatedRobotPose
-     *
-     * @param estimatedPose    estimated pose
-     * @param timestampSeconds timestamp of the estimate
+     * Constructs a LobstahEstimatedRobotPose
+     * @param bestEstimatedPose The best estimated pose
+     * @param alternateEstimatedPose The alternate estimated pose
+     * @param bestReprojErr The reprojection error for the best estimated pose
+     * @param altReprojErr The reprojection error for the alternate estimated pose
+     * @param timestampSeconds timestamp of estimate
+     * @param ambiguity the ambiguity
+     * @param targetsUsed list of {@link PhotonTrackedTarget}s used
+     * @param strategy the {@link PoseStrategy} used
      */
-    public EstimatedRobotPose(Pose3d bestEstimatedPose, Pose3d alternateEstimatedPose, double bestReprojErr,
+    public LobstahEstimatedRobotPose(Pose3d bestEstimatedPose, Pose3d alternateEstimatedPose, double bestReprojErr,
             double altReprojErr, double timestampSeconds, double ambiguity, List<PhotonTrackedTarget> targetsUsed,
             PoseStrategy strategy) {
+        super(bestEstimatedPose, timestampSeconds, targetsUsed, strategy);
         var targetsSeen = targetsUsed.size();
         var visibleFiducialIDs = new int[targetsSeen];
 
@@ -84,9 +83,6 @@ public class EstimatedRobotPose {
         this.alternateEstimatedPose = alternateEstimatedPose;
         this.bestReprojError = bestReprojErr;
         this.altReprojError = altReprojErr;
-        this.timestampSeconds = timestampSeconds;
-        this.targetsUsed = targetsUsed;
-        this.strategy = strategy;
         this.fiducialIDsUsed = visibleFiducialIDs;
         this.totalArea = area;
         this.multiTagAmbiguity = ambiguity;

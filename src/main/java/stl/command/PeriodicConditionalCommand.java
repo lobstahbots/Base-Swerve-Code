@@ -47,8 +47,8 @@ public class PeriodicConditionalCommand extends Command {
 
     CommandScheduler.getInstance().registerComposedCommands(onTrue, onFalse);
 
-    m_requirements.addAll(m_onTrue.getRequirements());
-    m_requirements.addAll(m_onFalse.getRequirements());
+    addRequirements(m_onTrue.getRequirements());
+    addRequirements(m_onFalse.getRequirements());
   }
 
   @Override

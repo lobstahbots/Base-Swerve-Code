@@ -6,15 +6,17 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
@@ -38,11 +40,11 @@ public class AutoFactory {
         this.responses = responsesSupplier;
         this.driveBase = driveBase;
 
-        AutoBuilder.configureHolonomic(driveBase::getPose, // Robot pose supplier
-                driveBase::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                driveBase::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                driveBase::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                DriveConstants.PATH_FOLLOWER_CONFIG, () -> {
+        AutoBuilder.configure(driveBase::getPose, driveBase::resetPose, driveBase::getRobotRelativeSpeeds,
+                (chassisSpeeds, driveFeedforwards) -> driveBase.driveRobotRelative(chassisSpeeds),
+                new PPHolonomicDriveController(DriveConstants.TRANSLATION_PID_CONSTANTS,
+                        DriveConstants.ROTATION_PID_CONSTANTS),
+                DriveConstants.ROBOT_CONFIG, () -> {
                     return DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
                 }, driveBase);
     }
@@ -64,8 +66,7 @@ public class AutoFactory {
     public Command getPathFindToPoseCommand(Pose2d targetPose) {
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0, // Goal end velocity in meters/sec
-                0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose, PathConstants.CONSTRAINTS, 0.0 // Goal end velocity in meters/sec
         ).andThen(new SwerveDriveStopCommand(driveBase));
 
         return pathfindingCommand;
@@ -80,8 +81,7 @@ public class AutoFactory {
     public Command getPathFindToPoseCommand(Supplier<Pose2d> targetPose) {
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose.get(), PathConstants.CONSTRAINTS, 0.0, // Goal end velocity in meters/sec
-                0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+        Command pathfindingCommand = AutoBuilder.pathfindToPoseFlipped(targetPose.get(), PathConstants.CONSTRAINTS, 0.0 // Goal end velocity in meters/sec
         ).andThen(new SwerveDriveStopCommand(driveBase));
 
         return pathfindingCommand;
@@ -101,22 +101,23 @@ public class AutoFactory {
      */
     public Command getPathFindToPathCommand(String pathname, PathType pathType) {
         PathPlannerPath path;
-        switch (pathType) {
-            case CHOREO:
-                path = PathPlannerPath.fromChoreoTrajectory(pathname);
-                break;
-            case PATHPLANNER:
-                path = PathPlannerPath.fromPathFile(pathname);
-                break;
-            default:
-                path = PathPlannerPath.fromChoreoTrajectory(pathname);
+        try {
+            switch (pathType) {
+                case CHOREO:
+                    path = PathPlannerPath.fromChoreoTrajectory(pathname);
+                    break;
+                case PATHPLANNER:
+                    path = PathPlannerPath.fromPathFile(pathname);
+                    break;
+                default:
+                    path = PathPlannerPath.fromChoreoTrajectory(pathname);
+            }
+
+            return AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS);
+        } catch (Exception exception) {
+            DriverStation.reportError("Could not load path " + pathname + ". Error: " + exception.getMessage(), false);
+            return Commands.none();
         }
-
-        // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
-        );
-
-        return pathfindingCommand;
     }
 
     /**
@@ -132,15 +133,14 @@ public class AutoFactory {
      *         set end rotation.
      */
     public Supplier<Command> getPathFromWaypoints(Rotation2d goalEndRotationHolonomic, Pose2d... poses) {
-        List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(poses);
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(poses);
 
         // Create the path using the bezier points created above
-        PathPlannerPath path = new PathPlannerPath(bezierPoints, PathConstants.CONSTRAINTS,
+        PathPlannerPath path = new PathPlannerPath(waypoints, PathConstants.CONSTRAINTS, null,
                 new GoalEndState(0.0, goalEndRotationHolonomic) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
         );
 
-        Supplier<Command> pathCommand = () -> AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS, 0.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
-        );
+        Supplier<Command> pathCommand = () -> AutoBuilder.pathfindThenFollowPath(path, PathConstants.CONSTRAINTS);
         return pathCommand;
     }
 
@@ -154,7 +154,7 @@ public class AutoFactory {
 
         var sysIdRoutine = new SysIdRoutine(new SysIdRoutine.Config(null, null, null, // Use default config
                 (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
-                new SysIdRoutine.Mechanism((Measure<Voltage> voltage) -> subsystem.runVolts(voltage.in(Volts)), null, // No log consumer, since data is recorded by AdvantageKit
+                new SysIdRoutine.Mechanism((Voltage voltage) -> subsystem.runVolts(voltage.in(Volts)), null, // No log consumer, since data is recorded by AdvantageKit
                         subsystem));
         switch (routine) {
             case QUASISTATIC_FORWARD:

@@ -6,10 +6,9 @@ package frc.robot.subsystems.drive;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -153,10 +152,10 @@ public class DriveBase extends CharacterizableSubsystem {
    * @param chassisSpeeds The desired ChassisSpeeds. Should be robot relative.
    */
   public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
-    Logger.recordOutput("Unoptimized:", DriveConstants.KINEMATICS.toSwerveModuleStates(discreteSpeeds));
+    chassisSpeeds.discretize(0.02);
+    Logger.recordOutput("Unoptimized:", DriveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     swerveSetpoint = setpointGenerator.generateSetpoint(DriveConstants.MODULE_LIMITS,
-        new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), discreteSpeeds, SimConstants.LOOP_TIME);
+        new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), chassisSpeeds, SimConstants.LOOP_TIME);
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveSetpoint.moduleStates, DriveConstants.MAX_DRIVE_SPEED);
     setModuleStates(swerveSetpoint.moduleStates);
   }

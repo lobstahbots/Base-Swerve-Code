@@ -6,7 +6,7 @@ package frc.robot.subsystems.drive;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;

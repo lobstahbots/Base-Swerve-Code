@@ -4,9 +4,12 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import org.littletonrobotics.junction.Logger;
 
-import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -86,18 +89,18 @@ public class SwerveModule {
    * @return The optimized SwerveModuleState.
    */
   public SwerveModuleState setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
-    SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(desiredState, inputs.turnPosition);
-    io.setTurnVoltage(angleController.calculate(getAngle().getRadians(), optimizedDesiredState.angle.getRadians()));
+    desiredState.optimize(inputs.turnPosition);
+    io.setTurnVoltage(angleController.calculate(getAngle().getRadians(), desiredState.angle.getRadians()));
 
     // Update velocity based on turn error
-    optimizedDesiredState.speedMetersPerSecond *= Math.cos(angleController.getPositionError());
+    desiredState.speedMetersPerSecond *= Math.cos(angleController.getError());
 
     // Run drive controller
-    double velocityRadPerSec = optimizedDesiredState.speedMetersPerSecond / (RobotConstants.WHEEL_DIAMETER / 2);
-    io.setDriveVoltage(feedforward.calculate(velocityRadPerSec)
+    double velocityRadPerSec = desiredState.speedMetersPerSecond / (RobotConstants.WHEEL_DIAMETER / 2);
+    io.setDriveVoltage(feedforward.calculate(RadiansPerSecond.of(velocityRadPerSec)).in(Volts)
         + driveController.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
 
-    return optimizedDesiredState;
+    return desiredState;
   }
 
   /**

@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.File;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -14,14 +15,14 @@ import org.littletonrobotics.urcl.URCL;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.hal.can.CANStatus;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SimConstants;
-import stl.networkalerts.Alert;
-import stl.networkalerts.Alert.AlertType;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -35,7 +36,7 @@ public class Robot extends LoggedRobot {
 
     private RobotContainer m_robotContainer;
 
-    private Alert canAlert = new Alert("CAN Error", AlertType.ERROR);
+    private Alert canAlert = new Alert("CAN Error", AlertType.kError);
 
     /**
      * This function is run when the robot is first started up and should be used
@@ -52,6 +53,8 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
         Logger.recordMetadata("Lobstah Bots", "2024 Robot Code");
 
+        Logger.registerURCL(URCL.startExternal());
+
         File log = new File(Filesystem.getOperatingDirectory(), "log");
         String logPath = log.getAbsolutePath();
 
@@ -65,11 +68,10 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(replayPath, "_replay")));
                 setUseTiming(false); // Run as fast as possible
             } else {
-                Logger.addDataReceiver(new WPILOGWriter(logPath, 0.02)); // Save outputs to a new log
+                Logger.addDataReceiver(new WPILOGWriter(logPath)); // Save outputs to a new log
             }
         }
         DataLogManager.start();
-        URCL.start();
         Logger.start();
 
         m_robotContainer = new RobotContainer();

@@ -87,10 +87,10 @@ public class SwerveDriveCommand extends Command {
       Translation2d linearVelocity = new Pose2d(new Translation2d(), linearDirection)
           .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d())).getTranslation();
 
-      driveBase.driveRobotRelative(
-          ChassisSpeeds.fromFieldRelativeSpeeds(linearVelocity.getX() * DriveConstants.MAX_DRIVE_SPEED,
-              linearVelocity.getY() * DriveConstants.MAX_DRIVE_SPEED, omega * DriveConstants.MAX_ANGULAR_SPEED,
-              driveBase.getGyroAngle()));
+      ChassisSpeeds chassisSpeeds = new ChassisSpeeds(linearVelocity.getX() * DriveConstants.MAX_DRIVE_SPEED,
+          linearVelocity.getY() * DriveConstants.MAX_DRIVE_SPEED, omega * DriveConstants.MAX_ANGULAR_SPEED);
+      chassisSpeeds.toRobotRelativeSpeeds(driveBase.getGyroAngle());
+      driveBase.driveRobotRelative(chassisSpeeds);
     } else {
       driveBase.driveRobotRelative(new ChassisSpeeds(strafeXSupplier.getAsDouble(), strafeYSupplier.getAsDouble(),
           rotationSupplier.getAsDouble()));
