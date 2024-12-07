@@ -35,6 +35,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 public class RobotContainer {
     private final DriveBase driveBase;
@@ -94,7 +95,11 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New New Path"));
+        try {
+            return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New New Path"));
+        } catch (Exception exception) {
+            return new RunCommand(() -> {});
+        }
     }
 
     public void configureButtonBindings() {
