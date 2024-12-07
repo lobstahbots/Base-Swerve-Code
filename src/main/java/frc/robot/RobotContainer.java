@@ -94,7 +94,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return AutoBuilder.followPath(PathPlannerPath.fromPathFile("Other Path"));
+        return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New New Path"));
     }
 
     public void configureButtonBindings() {
