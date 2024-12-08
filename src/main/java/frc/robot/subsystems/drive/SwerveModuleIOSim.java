@@ -4,54 +4,57 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.motorsims.SimulatedMotorController;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.Constants.RobotConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SimConstants;
-import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModuleIOSim implements SwerveModuleIO {
   /** Creates a new SwerveModuleSim. */
-  private DCMotor driveMotor = DCMotor.getNEO(1).withReduction(RobotConstants.DRIVE_GEAR_RATIO);
-  private DCMotor angleMotor = DCMotor.getNeo550(1).withReduction(RobotConstants.ANGLE_GEAR_RATIO);
-  private DCMotorSim simDriveMotor = new DCMotorSim(
-      LinearSystemId.createDCMotorSystem(SwerveConstants.KV, SwerveConstants.KA), driveMotor, 0.025, 0.025);
-  private DCMotorSim simAngleMotor = new DCMotorSim(
-      LinearSystemId.createDCMotorSystem(SwerveConstants.ANGLE_KV, SwerveConstants.ANGLE_KA), angleMotor, 0.025, 0.025);
+  private final SwerveModuleSimulation moduleSimulation;
+  // private final Simulated
+  private final SimulatedMotorController.GenericMotorController driveMotor;
+  private final SimulatedMotorController.GenericMotorController angleMotor;
 
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
   private Rotation2d angularOffset;
 
-  public SwerveModuleIOSim(double angularOffsetDegrees) {
+  public SwerveModuleIOSim(double angularOffsetDegrees, SwerveModuleSimulation moduleSimulation) {
+    this.moduleSimulation = moduleSimulation;
     this.angularOffset = Rotation2d.fromDegrees(angularOffsetDegrees);
+    driveMotor = moduleSimulation.useGenericMotorControllerForDrive()
+        .withCurrentLimit(Amps.of(DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT));
+    angleMotor = moduleSimulation.useGenericControllerForSteer()
+        .withCurrentLimit(Amps.of(DriveConstants.ANGLE_MOTOR_CURRENT_LIMIT));
   }
 
   public void updateInputs(ModuleIOInputs inputs) {
-    simDriveMotor.update(SimConstants.LOOP_TIME);
-    simAngleMotor.update(SimConstants.LOOP_TIME);
-
     if (DriverStation.isDisabled()) {
       setDriveVoltage(0);
       setTurnVoltage(0);
     }
 
-    inputs.turnAbsolutePosition = Rotation2d
-        .fromRadians(simAngleMotor.getAngularPositionRad() + angularOffset.getRadians());
-    inputs.turnPosition = Rotation2d.fromRadians(simAngleMotor.getAngularPositionRad());
-    inputs.drivePosition = Rotation2d.fromRadians(
-        simDriveMotor.getAngularPositionRad() + simDriveMotor.getAngularVelocityRadPerSec() * SimConstants.LOOP_TIME);
-    inputs.driveVelocityRadPerSec = simDriveMotor.getAngularVelocityRadPerSec();
+    inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing().plus(angularOffset);
+    inputs.turnPosition = new Rotation2d(moduleSimulation.getSteerRelativeEncoderPosition());
+    inputs.drivePosition = new Rotation2d(moduleSimulation.getDriveWheelFinalPosition()
+        .plus(moduleSimulation.getDriveWheelFinalSpeed().times(Seconds.of(SimConstants.LOOP_TIME))));
+    inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
     inputs.driveAppliedVolts = driveAppliedVolts;
-    inputs.driveCurrentAmps = new double[] { Math.abs(simDriveMotor.getCurrentDrawAmps()) };
-    inputs.turnVelocityRadPerSec = simAngleMotor.getAngularVelocityRadPerSec();
+    inputs.driveCurrentAmps = moduleSimulation.getDriveMotorSupplyCurrent().in(Amps);
+    inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
     inputs.turnAppliedVolts = turnAppliedVolts;
-    inputs.turnCurrentAmps = new double[] { Math.abs(simAngleMotor.getCurrentDrawAmps()) };
+    inputs.turnCurrentAmps = moduleSimulation.getSteerMotorSupplyCurrent().in(Amps);
     inputs.angularOffset = angularOffset;
   }
 
@@ -62,7 +65,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
    */
   public void setDriveVoltage(double volts) {
     driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    simDriveMotor.setInputVoltage(driveAppliedVolts);
+    driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
   }
 
   /**
@@ -72,6 +75,6 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
    */
   public void setTurnVoltage(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    simAngleMotor.setInputVoltage(turnAppliedVolts);
+    angleMotor.requestVoltage(Volts.of(turnAppliedVolts));
   }
 }
