@@ -14,8 +14,8 @@ import frc.robot.Constants.IOConstants.DriverIOConstants;
 import frc.robot.Constants.IOConstants.OperatorIOConstants;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.subsystems.drive.DriveBase;
-import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIONavX;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.SwerveModuleIOSim;
 import frc.robot.subsystems.drive.SwerveModuleIOSparkMax;
 import frc.robot.subsystems.vision.Vision;
@@ -26,6 +26,10 @@ import stl.auto.AutonSelector.AutoQuestion;
 
 import java.util.List;
 import java.util.Map;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -44,6 +48,8 @@ public class RobotContainer {
     private final AutonSelector<Object> autoChooser = new AutonSelector<>("Auto Chooser", "Do Nothing", List.of(),
             () -> Commands.none());
     private final AutoFactory autoFactory;
+
+    private SwerveDriveSimulation driveSimulation = null;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -66,12 +72,16 @@ public class RobotContainer {
             driveBase = new DriveBase(new GyroIONavX(), new Vision(new VisionIOPhoton()), frontLeft, frontRight,
                     backLeft, backRight, false);
         } else {
-            SwerveModuleIOSim frontLeft = new SwerveModuleIOSim(FrontLeftModuleConstants.angleOffset);
-            SwerveModuleIOSim frontRight = new SwerveModuleIOSim(FrontRightModuleConstants.angleOffset);
-            SwerveModuleIOSim backLeft = new SwerveModuleIOSim(BackLeftModuleConstants.angleOffset);
-            SwerveModuleIOSim backRight = new SwerveModuleIOSim(BackRightModuleConstants.angleOffset);
+            driveSimulation = new SwerveDriveSimulation(DriveConstants.MAPLE_SIM_CONFIG, new Pose2d(3, 3, new Rotation2d()));
+            SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
-            driveBase = new DriveBase(new GyroIO() {}, new Vision(new VisionIOSim()), frontLeft, frontRight, backLeft,
+            var modules = driveSimulation.getModules();
+            SwerveModuleIOSim frontLeft = new SwerveModuleIOSim(FrontLeftModuleConstants.angleOffset, modules[0]);
+            SwerveModuleIOSim frontRight = new SwerveModuleIOSim(FrontRightModuleConstants.angleOffset, modules[1]);
+            SwerveModuleIOSim backLeft = new SwerveModuleIOSim(BackLeftModuleConstants.angleOffset, modules[2]);
+            SwerveModuleIOSim backRight = new SwerveModuleIOSim(BackRightModuleConstants.angleOffset, modules[3]);
+
+            driveBase = new DriveBase(new GyroIOSim(driveSimulation.getGyroSimulation()) {}, new Vision(new VisionIOSim()), frontLeft, frontRight, backLeft,
                     backRight, false);
         }
 
@@ -123,5 +133,11 @@ public class RobotContainer {
                                         "Dynamic Forward", CharacterizationRoutine.DYNAMIC_FORWARD, "Dynamic Backward",
                                         CharacterizationRoutine.DYNAMIC_BACKWARD))),
                 autoFactory::getCharacterizationRoutine);
+    }
+
+    public void displaySimField() {
+        if (Robot.isReal()) return;
+
+        Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
     }
 }

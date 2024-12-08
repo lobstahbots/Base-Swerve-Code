@@ -160,7 +160,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
         ? Units.rotationsToRadians(drivingEncoder.getVelocity())
         : inputs.driveVelocityRadPerSec;
     inputs.driveAppliedVolts = driveMotor.getAppliedOutput() * driveMotor.getBusVoltage();
-    inputs.driveCurrentAmps = new double[] { driveMotor.getOutputCurrent() };
+    inputs.driveCurrentAmps = driveMotor.getOutputCurrent();
 
     inputs.turnAbsolutePosition = angleMotor.getLastError() == REVLibError.kOk
         ? Rotation2d.fromRadians(-angleAbsoluteEncoder.getPosition() - angularOffset.getRadians())
@@ -169,7 +169,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     inputs.turnVelocityRadPerSec = angleMotor.getLastError() == REVLibError.kOk ? angleAbsoluteEncoder.getVelocity()
         : inputs.turnVelocityRadPerSec;
     inputs.turnAppliedVolts = angleMotor.getAppliedOutput() * angleMotor.getBusVoltage();
-    inputs.turnCurrentAmps = new double[] { angleMotor.getOutputCurrent() };
+    inputs.turnCurrentAmps = angleMotor.getOutputCurrent();
     inputs.angularOffset = angularOffset;
   }
 

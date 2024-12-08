@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
@@ -141,8 +140,7 @@ public final class Constants {
         .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(GyroSimulation.getNav2X())
         .withRobotMass(RobotConstants.WEIGHT)
         .withSwerveModule(() -> new SwerveModuleSimulation(DCMotor.getNEO(1), DCMotor.getNeo550(1),
-            RobotConstants.DRIVE_GEAR_RATIO, RobotConstants.ANGLE_GEAR_RATIO, Amps.of(DRIVE_MOTOR_CURRENT_LIMIT),
-            Amps.of(ANGLE_MOTOR_CURRENT_LIMIT), Volts.of(SwerveConstants.KV), Volts.of(SwerveConstants.ANGLE_KV),
+            RobotConstants.DRIVE_GEAR_RATIO, RobotConstants.ANGLE_GEAR_RATIO, Volts.of(SwerveConstants.KV), Volts.of(SwerveConstants.ANGLE_KV),
             Meters.of(RobotConstants.WHEEL_DIAMETER / 2), KilogramSquareMeters.of(0.02), WHEEL_COF));
 
     public static class FrontLeftModuleConstants {
