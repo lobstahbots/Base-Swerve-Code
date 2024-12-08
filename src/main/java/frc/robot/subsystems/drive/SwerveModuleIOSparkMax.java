@@ -58,7 +58,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     driveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     var angleMotorConfig = new SparkMaxConfig().smartCurrentLimit(DriveConstants.ANGLE_MOTOR_CURRENT_LIMIT)
-        .idleMode(IdleMode.kBrake).voltageCompensation(12).inverted(false);
+        .idleMode(IdleMode.kBrake).voltageCompensation(12).inverted(inverted);
     angleMotorConfig.absoluteEncoder
         .positionConversionFactor(SwerveConstants.TURNING_ENCODER_POSITION_CONVERSION_FACTOR)
         .velocityConversionFactor(SwerveConstants.TURNING_ENCODER_VELOCITY_CONVERSION_FACTOR);
@@ -157,7 +157,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
         ? Rotation2d.fromRotations(drivingEncoder.getPosition())
         : inputs.drivePosition;
     inputs.driveVelocityRadPerSec = driveMotor.getLastError() == REVLibError.kOk
-        ? Units.rotationsToRadians(angleAbsoluteEncoder.getVelocity() / 60)
+        ? Units.rotationsToRadians(drivingEncoder.getVelocity())
         : inputs.driveVelocityRadPerSec;
     inputs.driveAppliedVolts = driveMotor.getAppliedOutput() * driveMotor.getBusVoltage();
     inputs.driveCurrentAmps = new double[] { driveMotor.getOutputCurrent() };

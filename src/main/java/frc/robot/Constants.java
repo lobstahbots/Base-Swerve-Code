@@ -76,13 +76,13 @@ public final class Constants {
   }
 
   public static class RobotConstants {
-    public static final double WHEELBASE = Units.inchesToMeters(28);
-    public static final double TRACK_WIDTH = Units.inchesToMeters(28);
+    public static final double WHEELBASE = Units.inchesToMeters(20);
+    public static final double TRACK_WIDTH = Units.inchesToMeters(20);
     public static final double EDGE_TO_MODULE_CENTER = Units.inchesToMeters(1.75);
     // Distance from robot center to module center
     public static final double RADIUS = Math.sqrt(2 * Math.pow(WHEELBASE / 2 - EDGE_TO_MODULE_CENTER, 2));
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(3);
-    public static final double DRIVE_GEAR_RATIO = 4.71;
+    public static final double DRIVE_GEAR_RATIO = 5.08;
     public static final double ANGLE_GEAR_RATIO = 9424 / 203;
     public static final double MAX_DRIVE_SPEED = 5.23; // from https://www.reca.lc/drive
     public static final Mass WEIGHT = Pounds.of(40);
@@ -150,15 +150,15 @@ public final class Constants {
       public static final int driveID = 11;
       public static final int angleID = 10;
       public static final double angleOffset = -90;
-      public static final boolean inverted = true;
+      public static final boolean inverted = false;
     }
 
-    public static class BackLeftModuleConstants {
-      public static final int moduleID = 2;
+    public static class BackRightModuleConstants {
+      public static final int moduleID = 3;
       public static final int driveID = 17;
       public static final int angleID = 16;
       public static final double angleOffset = 180;
-      public static final boolean inverted = true;
+      public static final boolean inverted = false;
     }
 
     public static class FrontRightModuleConstants {
@@ -166,15 +166,15 @@ public final class Constants {
       public static final int driveID = 13;
       public static final int angleID = 12;
       public static final double angleOffset = 0;
-      public static final boolean inverted = true;
+      public static final boolean inverted = false;
     }
 
-    public static class BackRightModuleConstants {
-      public static final int moduleID = 3;
+    public static class BackLeftModuleConstants {
+      public static final int moduleID = 2;
       public static final int driveID = 14;
       public static final int angleID = 15;
       public static final double angleOffset = 90;
-      public static final boolean inverted = true;
+      public static final boolean inverted = false;
     }
   }
 
@@ -189,7 +189,7 @@ public final class Constants {
     public static final double ANGLE_KA = 0.1;
     public static final double ANGLE_KV = 0.1;
 
-    public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = 1;
+    public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = 1 / RobotConstants.DRIVE_GEAR_RATIO;
     public static final double DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR = DRIVING_ENCODER_POSITION_CONVERSION_FACTOR
         / 60.0;
     public static final double TURNING_ENCODER_POSITION_CONVERSION_FACTOR = (2 * Math.PI);
