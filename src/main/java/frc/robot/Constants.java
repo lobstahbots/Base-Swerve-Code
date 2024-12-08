@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Volts;
 
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import com.pathplanner.lib.config.ModuleConfig;
@@ -116,11 +121,13 @@ public final class Constants {
 
     public static final double TURN_DEADBAND = Units.degreesToRadians(5);
 
+    public static final double WHEEL_COF = 1;
+
     public static final RobotConfig ROBOT_CONFIG = new RobotConfig(RobotConstants.WEIGHT, // Robot mass
         RobotConstants.MOI, // Robot moment of inertia
         new ModuleConfig(RobotConstants.WHEEL_DIAMETER / 2, // wheel diameter
             RobotConstants.MAX_DRIVE_SPEED, // max drive velocity (m/s)
-            1, // cof between wheels and ground
+            WHEEL_COF, // cof between wheels and ground
             DCMotor.getNEO(1).withReduction(RobotConstants.DRIVE_GEAR_RATIO), // DCMotor representing motor, including reduction
             DRIVE_MOTOR_CURRENT_LIMIT, // current limit for drive motors
             1 // number of drive motors per module
@@ -129,6 +136,14 @@ public final class Constants {
     );
     public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.5, 0.0, 0);
     public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2.25, 0.0, 0);
+
+    public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG = DriveTrainSimulationConfig.Default()
+        .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(GyroSimulation.getNav2X())
+        .withRobotMass(RobotConstants.WEIGHT)
+        .withSwerveModule(() -> new SwerveModuleSimulation(DCMotor.getNEO(1), DCMotor.getNeo550(1),
+            RobotConstants.DRIVE_GEAR_RATIO, RobotConstants.ANGLE_GEAR_RATIO, Amps.of(DRIVE_MOTOR_CURRENT_LIMIT),
+            Amps.of(ANGLE_MOTOR_CURRENT_LIMIT), Volts.of(SwerveConstants.KV), Volts.of(SwerveConstants.ANGLE_KV),
+            Meters.of(RobotConstants.WHEEL_DIAMETER / 2), KilogramSquareMeters.of(0.02), WHEEL_COF));
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
