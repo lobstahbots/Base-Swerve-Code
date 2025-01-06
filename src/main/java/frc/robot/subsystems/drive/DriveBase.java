@@ -70,8 +70,8 @@ public class DriveBase extends CharacterizableSubsystem {
       SwerveModuleIO backLeft, SwerveModuleIO backRight, boolean isOpenLoop) {
     this.modules = new SwerveModule[] { new SwerveModule(frontLeft, FrontLeftModuleConstants.moduleID),
         new SwerveModule(frontRight, FrontRightModuleConstants.moduleID),
-        new SwerveModule(backLeft, BackRightModuleConstants.moduleID),
-        new SwerveModule(backRight, BackLeftModuleConstants.moduleID) };
+        new SwerveModule(backLeft, BackLeftModuleConstants.moduleID),
+        new SwerveModule(backRight, BackRightModuleConstants.moduleID) };
 
     this.gyro = gyroIO;
 
@@ -152,10 +152,9 @@ public class DriveBase extends CharacterizableSubsystem {
    * @param chassisSpeeds The desired ChassisSpeeds. Should be robot relative.
    */
   public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
-    chassisSpeeds.discretize(0.02);
     Logger.recordOutput("Unoptimized:", DriveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds));
     swerveSetpoint = setpointGenerator.generateSetpoint(DriveConstants.MODULE_LIMITS,
-        new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), chassisSpeeds, SimConstants.LOOP_TIME);
+        new SwerveSetpoint(getRobotRelativeSpeeds(), getStates()), ChassisSpeeds.discretize(chassisSpeeds, 0.02), SimConstants.LOOP_TIME);
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveSetpoint.moduleStates, DriveConstants.MAX_DRIVE_SPEED);
     setModuleStates(swerveSetpoint.moduleStates);
   }

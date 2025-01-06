@@ -62,7 +62,7 @@ public class SwerveModuleIOSparkMax implements SwerveModuleIO {
     angleMotorConfig.absoluteEncoder
         .positionConversionFactor(SwerveConstants.TURNING_ENCODER_POSITION_CONVERSION_FACTOR)
         .velocityConversionFactor(SwerveConstants.TURNING_ENCODER_VELOCITY_CONVERSION_FACTOR);
-    angleMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    angleMotor.configure(angleMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     drivingEncoder = driveMotor.getEncoder();
     angleAbsoluteEncoder = angleMotor.getAbsoluteEncoder();

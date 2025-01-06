@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import org.littletonrobotics.junction.Logger;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -97,7 +94,7 @@ public class SwerveModule {
 
     // Run drive controller
     double velocityRadPerSec = desiredState.speedMetersPerSecond / (RobotConstants.WHEEL_DIAMETER / 2);
-    io.setDriveVoltage(feedforward.calculate(RadiansPerSecond.of(velocityRadPerSec)).in(Volts)
+    io.setDriveVoltage(feedforward.calculate(velocityRadPerSec)
         + driveController.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
 
     return desiredState;
@@ -113,8 +110,8 @@ public class SwerveModule {
     io.setTurnIdleMode(mode);
   }
 
-  /** 
-   * @return The current turn angle of the module. 
+  /**
+   * @return The current turn angle of the module.
    */
   public Rotation2d getAngle() {
     return new Rotation2d(inputs.turnPosition.getRadians());

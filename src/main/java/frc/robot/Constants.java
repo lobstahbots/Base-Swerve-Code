@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Volts;
 
+import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -81,7 +82,7 @@ public final class Constants {
     // Distance from robot center to module center
     public static final double RADIUS = Math.sqrt(2 * Math.pow(WHEELBASE / 2 - EDGE_TO_MODULE_CENTER, 2));
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(3);
-    public static final double DRIVE_GEAR_RATIO = 5.08;
+    public static final double DRIVE_GEAR_RATIO = 4.71;
     public static final double ANGLE_GEAR_RATIO = 9424 / 203;
     public static final double MAX_DRIVE_SPEED = 5.23; // from https://www.reca.lc/drive
     public static final Mass WEIGHT = Pounds.of(40);
@@ -130,18 +131,13 @@ public final class Constants {
             DCMotor.getNEO(1).withReduction(RobotConstants.DRIVE_GEAR_RATIO), // DCMotor representing motor, including reduction
             DRIVE_MOTOR_CURRENT_LIMIT, // current limit for drive motors
             1 // number of drive motors per module
-        ), Meters.of(RobotConstants.TRACK_WIDTH), // robot track width
-        Meters.of(RobotConstants.WHEELBASE) // robot wheel base
-    );
+        ), MODULE_LOCATIONS);
     public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.5, 0.0, 0);
     public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2.25, 0.0, 0);
 
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG = DriveTrainSimulationConfig.Default()
-        .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(GyroSimulation.getNav2X())
-        .withRobotMass(RobotConstants.WEIGHT)
-        .withSwerveModule(() -> new SwerveModuleSimulation(DCMotor.getNEO(1), DCMotor.getNeo550(1),
-            RobotConstants.DRIVE_GEAR_RATIO, RobotConstants.ANGLE_GEAR_RATIO, Volts.of(SwerveConstants.KV), Volts.of(SwerveConstants.ANGLE_KV),
-            Meters.of(RobotConstants.WHEEL_DIAMETER / 2), KilogramSquareMeters.of(0.02), WHEEL_COF));
+        .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(COTS.ofNav2X()).withRobotMass(RobotConstants.WEIGHT)
+        .withSwerveModule(COTS.ofMAXSwerve(DCMotor.getNEO(1), DCMotor.getNeo550(1), WHEEL_COF, 3));
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
