@@ -127,38 +127,38 @@ public final class Constants {
         ), Meters.of(RobotConstants.TRACK_WIDTH), // robot track width
         Meters.of(RobotConstants.WHEELBASE) // robot wheel base
     );
-    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.5, 0.0, 0);
-    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2.25, 0.0, 0);
+    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.2, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
-      public static final int driveID = 11;
-      public static final int angleID = 10;
+      public static final int driveID = 14;
+      public static final int angleID = 15;
       public static final double angleOffset = -90;
       public static final boolean inverted = false;
     }
 
     public static class BackRightModuleConstants {
       public static final int moduleID = 3;
-      public static final int driveID = 17;
-      public static final int angleID = 16;
-      public static final double angleOffset = 180;
+      public static final int driveID = 11;
+      public static final int angleID = 10;
+      public static final double angleOffset = 90;
       public static final boolean inverted = false;
     }
 
     public static class FrontRightModuleConstants {
       public static final int moduleID = 1;
-      public static final int driveID = 13;
-      public static final int angleID = 12;
+      public static final int driveID = 16;
+      public static final int angleID = 17;
       public static final double angleOffset = 0;
       public static final boolean inverted = false;
     }
 
     public static class BackLeftModuleConstants {
       public static final int moduleID = 2;
-      public static final int driveID = 14;
-      public static final int angleID = 15;
-      public static final double angleOffset = 90;
+      public static final int driveID = 13;
+      public static final int angleID = 12;
+      public static final double angleOffset = 180;
       public static final boolean inverted = false;
     }
   }

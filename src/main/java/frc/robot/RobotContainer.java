@@ -86,7 +86,7 @@ public class RobotContainer {
         driveBase.setDefaultCommand(new SwerveDriveCommand(driveBase,
                 () -> -driverJoystick.getRawAxis(DriverIOConstants.STRAFE_Y_AXIS),
                 () -> -driverJoystick.getRawAxis(DriverIOConstants.STRAFE_X_AXIS),
-                () -> -driverJoystick.getRawAxis(DriverIOConstants.ROTATION_AXIS), () -> DriveConstants.FIELD_CENTRIC, DriverIOConstants.SQUARE_INPUTS));
+                () -> driverJoystick.getRawAxis(DriverIOConstants.ROTATION_AXIS), () -> DriveConstants.FIELD_CENTRIC, DriverIOConstants.SQUARE_INPUTS));
     }
 
     /**

@@ -70,8 +70,8 @@ public class DriveBase extends CharacterizableSubsystem {
       SwerveModuleIO backLeft, SwerveModuleIO backRight, boolean isOpenLoop) {
     this.modules = new SwerveModule[] { new SwerveModule(frontLeft, FrontLeftModuleConstants.moduleID),
         new SwerveModule(frontRight, FrontRightModuleConstants.moduleID),
-        new SwerveModule(backLeft, BackRightModuleConstants.moduleID),
-        new SwerveModule(backRight, BackLeftModuleConstants.moduleID) };
+        new SwerveModule(backLeft, BackLeftModuleConstants.moduleID),
+        new SwerveModule(backRight, BackRightModuleConstants.moduleID) };
 
     this.gyro = gyroIO;
 
