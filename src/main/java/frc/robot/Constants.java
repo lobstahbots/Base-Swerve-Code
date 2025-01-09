@@ -127,8 +127,8 @@ public final class Constants {
         ), Meters.of(RobotConstants.TRACK_WIDTH), // robot track width
         Meters.of(RobotConstants.WHEELBASE) // robot wheel base
     );
-    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.2, 0.0, 0);
-    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
+    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2, 0.0, 0);
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
@@ -186,8 +186,8 @@ public final class Constants {
 
     public static final double DRIVE_PID_MIN_OUTPUT = -1;
     public static final double DRIVE_PID_MAX_OUTPUT = 1;
-    public static final double DRIVE_PID_P = 0.1;
-    public static final double DRIVE_PID_I = 0;
+    public static final double DRIVE_PID_P = 0.05;
+    public static final double DRIVE_PID_I = 0.02;
     public static final double DRIVE_PID_D = 0;
     public static final double DRIVE_PID_FF = 0;
 
