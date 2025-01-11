@@ -132,8 +132,8 @@ public final class Constants {
             DRIVE_MOTOR_CURRENT_LIMIT, // current limit for drive motors
             1 // number of drive motors per module
         ), MODULE_LOCATIONS);
-    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.5, 0.0, 0);
-    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2.25, 0.0, 0);
+    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2, 0.0, 0);
 
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG = DriveTrainSimulationConfig.Default()
         .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(COTS.ofNav2X()).withRobotMass(RobotConstants.WEIGHT)
@@ -141,33 +141,33 @@ public final class Constants {
 
     public static class FrontLeftModuleConstants {
       public static final int moduleID = 0;
-      public static final int driveID = 11;
-      public static final int angleID = 10;
+      public static final int driveID = 14;
+      public static final int angleID = 15;
       public static final double angleOffset = -90;
       public static final boolean inverted = false;
     }
 
     public static class BackRightModuleConstants {
       public static final int moduleID = 3;
-      public static final int driveID = 17;
-      public static final int angleID = 16;
-      public static final double angleOffset = 180;
+      public static final int driveID = 11;
+      public static final int angleID = 10;
+      public static final double angleOffset = 90;
       public static final boolean inverted = false;
     }
 
     public static class FrontRightModuleConstants {
       public static final int moduleID = 1;
-      public static final int driveID = 13;
-      public static final int angleID = 12;
+      public static final int driveID = 16;
+      public static final int angleID = 17;
       public static final double angleOffset = 0;
       public static final boolean inverted = false;
     }
 
     public static class BackLeftModuleConstants {
       public static final int moduleID = 2;
-      public static final int driveID = 14;
-      public static final int angleID = 15;
-      public static final double angleOffset = 90;
+      public static final int driveID = 13;
+      public static final int angleID = 12;
+      public static final double angleOffset = 180;
       public static final boolean inverted = false;
     }
   }
@@ -195,8 +195,8 @@ public final class Constants {
 
     public static final double DRIVE_PID_MIN_OUTPUT = -1;
     public static final double DRIVE_PID_MAX_OUTPUT = 1;
-    public static final double DRIVE_PID_P = 0.1;
-    public static final double DRIVE_PID_I = 0;
+    public static final double DRIVE_PID_P = 0.05;
+    public static final double DRIVE_PID_I = 0.02;
     public static final double DRIVE_PID_D = 0;
     public static final double DRIVE_PID_FF = 0;
 
