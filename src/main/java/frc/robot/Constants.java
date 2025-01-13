@@ -115,10 +115,6 @@ public final class Constants {
     public static final double PATH_MAX_ACCEL = 3;
     public static final double PATH_MAX_VELOCITY = 3;
 
-    public static final double TURN_KP = 2;
-    public static final double TURN_KI = 0;
-    public static final double TURN_KD = 0;
-
     public static final double TURN_DEADBAND = Units.degreesToRadians(5);
 
     public static final double WHEEL_COF = 1;
@@ -133,7 +129,7 @@ public final class Constants {
             1 // number of drive motors per module
         ), MODULE_LOCATIONS);
     public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
-    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(2, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0.0, 0);
 
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG = DriveTrainSimulationConfig.Default()
         .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(COTS.ofNav2X()).withRobotMass(RobotConstants.WEIGHT)
@@ -195,16 +191,16 @@ public final class Constants {
 
     public static final double DRIVE_PID_MIN_OUTPUT = -1;
     public static final double DRIVE_PID_MAX_OUTPUT = 1;
-    public static final double DRIVE_PID_P = 0.05;
-    public static final double DRIVE_PID_I = 0.02;
+    public static final double DRIVE_PID_P = 0.045;
+    public static final double DRIVE_PID_I = 0;
     public static final double DRIVE_PID_D = 0;
     public static final double DRIVE_PID_FF = 0;
 
     public static final double TURN_PID_MIN_OUTPUT = -2 * Math.PI;
     public static final double TURN_PID_MAX_OUTPUT = 2 * Math.PI;
-    public static final double TURN_PID_P = 2;
+    public static final double TURN_PID_P = 5;
     public static final double TURN_PID_I = 0;
-    public static final double TURN_PID_D = 0;
+    public static final double TURN_PID_D = 0.15;
     public static final double TURN_PID_FF = 0;
 
     public static final double AIM_VELOCITY_COMPENSATION_DEADBAND = 0.3;

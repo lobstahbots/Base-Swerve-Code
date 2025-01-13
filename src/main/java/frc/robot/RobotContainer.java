@@ -106,7 +106,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         try {
-            return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New New Path"));
+            return AutoBuilder.followPath(PathPlannerPath.fromPathFile("Other Path"));
         } catch (Exception exception) {
             return new RunCommand(() -> {});
         }
