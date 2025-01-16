@@ -128,8 +128,8 @@ public final class Constants {
             DRIVE_MOTOR_CURRENT_LIMIT, // current limit for drive motors
             1 // number of drive motors per module
         ), MODULE_LOCATIONS);
-    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(1, 0.0, 0);
-    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0.0, 0);
+    public static final PIDConstants ROTATION_PID_CONSTANTS = new PIDConstants(0.55, 0.0, 0);
+    public static final PIDConstants TRANSLATION_PID_CONSTANTS = new PIDConstants(7, 0.0, 0);
 
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG = DriveTrainSimulationConfig.Default()
         .withCustomModuleTranslations(MODULE_LOCATIONS).withGyro(COTS.ofNav2X()).withRobotMass(RobotConstants.WEIGHT)
